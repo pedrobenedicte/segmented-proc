@@ -1,7 +1,3 @@
 sudo apt-get install verilog	# compiler
 sudo apt-get install gtkwave	# wave analyzer
 				# editor?
-
-# Simple compile
-iverilog test.v -o test
-
