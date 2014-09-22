@@ -1,0 +1,2 @@
+# Starting guide
+http://iverilog.wikia.com/wiki/GTKWAVE
