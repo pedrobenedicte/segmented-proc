@@ -1,2 +1,0 @@
-# Simple compile
-iverilog test.v -o test
