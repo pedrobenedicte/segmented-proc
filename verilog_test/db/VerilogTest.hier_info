@@ -1,6 +1,0 @@
-|VerilogTest
-A => F.IN0
-B => F.IN1
-F <= F.DB_MAX_OUTPUT_PORT_TYPE
-
-
