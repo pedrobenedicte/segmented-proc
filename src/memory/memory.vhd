@@ -30,7 +30,7 @@ architecture comportament of memory is
     -- Instructions to read a text file into RAM --
     procedure Load_FitxerDadesMemoria (signal data_word :inout BLOQUE_RAM) is
         -- Open File in Read Mode
-        file romfile   :text open read_mode is "contingut.memoria.bin.rom";
+        file romfile   :text open read_mode is "test.rom";
         variable lbuf  :line;
         variable i     :integer := 49152;  -- X"C000" ==> 49152 adreca inicial S.O.
         variable fdata :std_logic_vector (7 downto 0);
