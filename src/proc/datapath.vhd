@@ -1,27 +1,27 @@
 LIBRARY ieee;
-USE ieee.std_logic_1164.all;
+use ieee.std_logic_1164.all;
 use IEEE.numeric_std.all;
-USE ieee.std_logic_unsigned.all;
+use ieee.std_logic_unsigned.all;
 
-ENTITY datapath IS 
+entity datapath is 
 
-END datapath;
+end datapath;
 
 
-ARCHITECTURE Structure OF datapath IS
+architecture Structure OF datapath is
 
-	COMPONENT stage_decode IS
+	component stage_decode is
 		
-	END COMPONENT;
+	end component;
 
-	COMPONENT ff_decode_alu IS
+	component ff_decode_alu is
 		
-	END COMPONENT;
+	end component;
 
-BEGIN
+begin
 
 	-- Stages and interconnection between stages
 	d	:	stage_decode;
 	ffd_a	:	ff_decode_alu;
 
-END Structure;
+end Structure;

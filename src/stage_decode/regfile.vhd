@@ -5,17 +5,17 @@ use IEEE.numeric_std.all;
 ENTITY regfile IS
 	PORT (clk		: IN	STD_LOGIC;
 			wrd		: IN	STD_LOGIC;
-			d 			: IN 	STD_LOGIC_VECTOR(31 DOWNTO 0);
-			addr_a	: IN	STD_LOGIC_VECTOR(3 DOWNTO 0);
-			addr_b	: IN	STD_LOGIC_VECTOR(3 DOWNTO 0);
-			addr_d	: IN	STD_LOGIC_VECTOR(3 DOWNTO 0);
-			a			: OUT	STD_LOGIC_VECTOR(31 DOWNTO 0);
-			b			: OUT	STD_LOGIC_VECTOR(31 DOWNTO 0));
+			d 		: IN 	STD_LOGIC_VECTOR(15 DOWNTO 0);
+			addr_a	: IN	STD_LOGIC_VECTOR(2 DOWNTO 0);
+			addr_b	: IN	STD_LOGIC_VECTOR(2 DOWNTO 0);
+			addr_d	: IN	STD_LOGIC_VECTOR(2 DOWNTO 0);
+			a		: OUT	STD_LOGIC_VECTOR(15 DOWNTO 0);
+			b		: OUT	STD_LOGIC_VECTOR(15 DOWNTO 0));
 END regfile;
 
 
-ARCHITECTURE Structure OF regfile IS
-	TYPE REGS IS ARRAY (15 DOWNTO 0) OF STD_LOGIC_VECTOR(31 downto 0);
+architecture Structure OF regfile IS
+	TYPE REGS IS ARRAY (7 DOWNTO 0) OF STD_LOGIC_VECTOR(15 downto 0);
 	SIGNAL br : REGS;
 BEGIN
 	a <= br(to_integer(unsigned(addr_a)));

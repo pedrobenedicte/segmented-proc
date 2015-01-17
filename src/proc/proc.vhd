@@ -1,20 +1,20 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
 
-ENTITY proc IS
+entity proc is
 
-END proc;
-
-
-ARCHITECTURE Structure OF proc IS
-
-	COMPONENT datapath IS
-	END COMPONENT;
-
-	COMPONENT control_unit IS
-	END COMPONENT;
-
-BEGIN
+end proc;
 
 
-END Structure;
+architecture Structure of proc is
+
+	component datapath is
+	end component;
+
+	component control_unit is
+	end component;
+
+begin
+
+
+end Structure;

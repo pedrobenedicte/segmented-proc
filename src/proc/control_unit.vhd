@@ -1,16 +1,16 @@
 LIBRARY ieee;
-USE ieee.std_logic_1164.all;
+use ieee.std_logic_1164.all;
 use IEEE.numeric_std.all;
-USE ieee.std_logic_unsigned.all;
+use ieee.std_logic_unsigned.all;
 
-ENTITY control_unit IS 
+entity control_unit is
 
-END control_unit;
-
-
-ARCHITECTURE Structure OF control_unit IS
-
-BEGIN
+end control_unit;
 
 
-END Structure;
+architecture Structure of control_unit is
+
+begin
+
+
+end Structure;

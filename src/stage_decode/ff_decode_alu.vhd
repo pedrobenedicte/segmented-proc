@@ -1,16 +1,16 @@
 LIBRARY ieee;
-USE ieee.std_logic_1164.all;
+use ieee.std_logic_1164.all;
 use IEEE.numeric_std.all;
-USE ieee.std_logic_unsigned.all;
+use ieee.std_logic_unsigned.all;
 
-ENTITY ff_decode_alu IS 
+entity ff_decode_alu is 
 
-END ff_decode_alu;
-
-
-ARCHITECTURE Structure OF ff_decode_alu IS
-
-BEGIN
+end ff_decode_alu;
 
 
-END Structure;
+architecture Structure of ff_decode_alu is
+
+begin
+
+
+end Structure;

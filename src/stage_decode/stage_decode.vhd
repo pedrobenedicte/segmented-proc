@@ -1,16 +1,16 @@
 LIBRARY ieee;
-USE ieee.std_logic_1164.all;
+use ieee.std_logic_1164.all;
 use IEEE.numeric_std.all;
-USE ieee.std_logic_unsigned.all;
+use ieee.std_logic_unsigned.all;
 
-ENTITY stage_decode IS 
+entity stage_decode is
 
-END stage_decode;
-
-
-ARCHITECTURE Structure OF stage_decode IS
-
-BEGIN
+end stage_decode;
 
 
-END Structure;
+architecture Structure of stage_decode is
+
+begin
+
+
+end Structure;
