@@ -12,6 +12,13 @@ entity stage_alu is
 		opcode		: in	std_logic_vector(1 downto 0);
 		w			: in	std_logic_vector(15 downto 0);
 		
+		bypass_a	: in	std_logic_vector(1 downto 0);
+		bypass_b	: in	std_logic_vector(1 downto 0);
+		bypass_rdest: in	std_logic_vector(1 downto 0);
+		bp_awb		: in	std_logic_vector(15 downto 0);
+		bp_mwb		: in	std_logic_vector(15 downto 0);
+		bp_fwb		: in	std_logic_vector(15 downto 0);
+		
 		mem_data_in	: in	std_logic_vector(15 downto 0);
 		mem_data_out: out	std_logic_vector(15 downto 0);
 		rdest_in	: in	std_logic_vector(2 downto 0);
@@ -33,9 +40,10 @@ architecture Structure of stage_alu is
 	);
 	end component;
 
-	signal selected_a	: std_logic_vector(15 downto 0);
-	signal selected_b	: std_logic_vector(15 downto 0);
-	signal z			: std_logic;
+	signal selected_a		: std_logic_vector(15 downto 0);
+	signal selected_b		: std_logic_vector(15 downto 0);
+	signal z				: std_logic;
+	
 	
 begin
 
@@ -49,7 +57,25 @@ begin
 		z			=> z
 	);
 
-	mem_data_out <= mem_data_in;
+	-- Bypasses
+	with bypass_a select
+		selected_a	<=	a		when "00",
+						bp_awb	when "01",
+						bp_mwb	when "10",
+						bp_fwb	when "11";
+	
+	with bypass_b select
+		selected_b	<=	b		when "00",
+						bp_awb	when "01",
+						bp_mwb	when "10",
+						bp_fwb	when "11";
+
+	with bypass_rdest select
+		mem_data_out	<=	mem_data_in	when "00",
+							bp_awb		when "01",
+							bp_mwb		when "10",
+							bp_fwb		when "11";
+	
 	rdest_out <= rdest_in;
 
 end Structure;
