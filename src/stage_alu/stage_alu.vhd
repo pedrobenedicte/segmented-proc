@@ -6,10 +6,11 @@ use ieee.std_logic_unsigned.all;
 entity stage_alu is
 	port (
 		clk			: in	std_logic;
-		stall		: in	std_logic;
-		nop			: in	std_logic;
 		a			: in	std_logic_vector(15 downto 0);
 		b			: in	std_logic_vector(15 downto 0);
+		opclass		: in 	std_logic_vector(2 downto 0);
+		opcode		: in	std_logic_vector(1 downto 0);
+		w			: in	std_logic_vector(15 downto 0);
 		
 		mem_data_in	: in	std_logic_vector(15 downto 0);
 		mem_data_out: out	std_logic_vector(15 downto 0);
@@ -21,7 +22,33 @@ end stage_alu;
 
 architecture Structure of stage_alu is
 
+	component alu is
+		PORT (	
+		x 			: IN	STD_LOGIC_VECTOR(15 DOWNTO 0);
+		y			: IN	STD_LOGIC_VECTOR(15 DOWNTO 0);
+		opclass		: IN	STD_LOGIC_VECTOR(3 DOWNTO 0);
+		opcode		: IN	STD_LOGIC_VECTOR(2 DOWNTO 0);
+		w			: OUT	STD_LOGIC_VECTOR(15 DOWNTO 0);
+		z			: OUT	STD_LOGIC
+	);
+	end component;
+
+	signal selected_a	: std_logic_vector(15 downto 0);
+	signal selected_b	: std_logic_vector(15 downto 0);
+	signal z			: std_logic;
+	
 begin
+
+	alu0 :	alu
+	Port Map( 	
+		x			=> selected_a,
+		y			=> selected_b,
+		opclass		=> opclass,
+		opcode		=> opcode,
+		w			=> w,
+		z			=> z
+	);
+
 	mem_data_out <= mem_data_in;
 	rdest_out <= rdest_in;
 
