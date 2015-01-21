@@ -10,7 +10,11 @@ entity control_unit is
 		bp_alu_a	: out	std_logic_vector(1 downto 0);
 		bp_alu_b	: out	std_logic_vector(1 downto 0);
 		bp_dec_a	: out	std_logic_vector(1 downto 0);
-		bp_dec_b	: out	std_logic_vector(1 downto 0)
+		bp_dec_b	: out	std_logic_vector(1 downto 0);
+		
+		-- Signals to/from fetch
+		fetch_pc			: out	std_logic_vector(15 downto 0);
+		fetch_ir			: in	std_logic_vector(15 downto 0)
 	);
 end control_unit;
 
@@ -26,9 +30,22 @@ architecture Structure of control_unit is
 		opclass	: std_logic_vector(2 downto 0);
 		opcode	: std_logic_vector(1 downto 0);
 	end record;
-	type reg_stages is array (7 downto 0) of reg_stages_entry;
+	type reg_stages is array (0 to 7) of reg_stages_entry;
 	
-	signal rstages : reg_stages;
+	signal rstages	: reg_stages;
+	
+	signal newPC	: std_logic_vector(15 downto 0);
+	
+	-- Defines
+		constant FETCH	: std_logic	:= '0';
+		constant DECODE	: std_logic	:= '1';
+		constant ALU	: std_logic	:= '2';
+		constant LOOKUP	: std_logic	:= '3';
+		constant CACHE	: std_logic	:= '4';
+		constant MEMWB	: std_logic	:= '5';
+		constant F5		: std_logic	:= '6';
+		constant FOPWB	: std_logic	:= '7';
+		constant EXCVECTOR	: std_logic_vector(15 downto 0) := "0001000000000000";
 	
 	-- Instruction decode signlas
 		constant NOP	: std_logic_vector(2 downto 0) := "000";
@@ -43,6 +60,8 @@ architecture Structure of control_unit is
 		signal addr_d	: std_logic_vector(2 downto 0);
 		signal addr_a	: std_logic_vector(2 downto 0);
 		signal addr_b	: std_logic_vector(2 downto 0);
+	
+	signal ctrl_pc	: std_logic_vector(1 downto 0) :="00";
 	
 begin
 
@@ -59,17 +78,29 @@ begin
 			immed	<=	SXT(ir(10 DOWNTO 6),immed'length) when MEM, -- TODO change to extend sign
 						SXT(ir(10 DOWNTO 3),immed'length) when BNZ;
 	
-
 	
+	with ctrl_pc select
+		newPC	<=	rstages(FETCH).pc+4		when "00",
+					rstages(FETCH).pc+jump	when "01",
+					EXCVECTOR				when "10",
+					rstages(FETCH).pc+4		when others;
+
+	-- Fetch signals assignation
+	fetch_pc	<=	rstages(FETCH).pc;
 	
 	
 	process(clk)
 	begin
 		if (rising_edge(clk)) then
-		
-			-- move_stages (stall, nop)
-			-- insert_new_pc (stall, nop)
-		
+			if boot = '1' then
+				rstages(FETCH).pc	<= "1100000000000000";
+				-- inizialitation
+			else
+				-- if exception/interruption
+				-- elsif branch
+				-- else +4
+				rstages(FETCH).pc	<= newPC;
+			end if;
 		end if;
 	end process;
 

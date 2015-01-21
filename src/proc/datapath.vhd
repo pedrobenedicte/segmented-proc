@@ -79,6 +79,8 @@ architecture Structure OF datapath is
 		
 	end component;
 	
+	signal regPC : std_logic_vector(15 downto 0);
+	
 begin
 
 	fch		:	stage_fetch;

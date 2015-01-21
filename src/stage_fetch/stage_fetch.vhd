@@ -4,7 +4,12 @@ use IEEE.numeric_std.all;
 use ieee.std_logic_unsigned.all;
 
 entity stage_fetch is
-
+	port (
+		clk			: in	std_logic;
+		
+		pc			: in	std_logic_vector(15 downto 0);
+		ir			: out	std_logic_vector(15 downto 0)
+	);
 end stage_fetch;
 
 
