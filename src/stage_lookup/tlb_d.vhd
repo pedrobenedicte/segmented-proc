@@ -58,7 +58,7 @@ architecture Structure of tlb_d is
 		
 begin
 	page_logical <= add_logical(15 downto 6);
-	add_physical <= page_physical + add_logical(5 downto 0);
+	add_physical <= page_physical(9 downto 0) & add_logical(5 downto 0);
 	process (clk)
 	begin
 		if (clk'event and clk = '1') then
