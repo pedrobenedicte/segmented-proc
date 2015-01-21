@@ -18,7 +18,7 @@ end entity;
 architecture Structure of tlb_d is
 	signal page_logical	: std_logic_vector(9 downto 0);
 	signal page_physical	: std_logic_vector(9 downto 0);
-	signal hit				: std_logic_vector(9 downto 0);
+	signal hit				: std_logic_vector(4 downto 0);
 	
 	-- 5 entries,       Valid | Logical page | Physical page
 	--                   1b   |     10b      |     10b
