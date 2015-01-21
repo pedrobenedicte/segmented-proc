@@ -9,10 +9,10 @@ entity stage_decode is
 		
 		-- Value and addr of d to be written in Regfile.
 		-- Also used as bypasses for a and b
-		alu_d		: in	std_logic_vector(15 downto 0);
+		artm_d		: in	std_logic_vector(15 downto 0);
 		mem_d		: in	std_logic_vector(15 downto 0);
 		fop_d		: in	std_logic_vector(15 downto 0);
-		alu_addr_d	: in	std_logic_vector(2 downto 0);
+		artm_addr_d	: in	std_logic_vector(2 downto 0);
 		mem_addr_d	: in	std_logic_vector(2 downto 0);
 		fop_addr_d	: in	std_logic_vector(2 downto 0);
 		
@@ -76,12 +76,12 @@ begin
 
 	-- D writting data and addr routing
 	with ctrl_d select
-		selected_d		<=	alu_d	when "00",
+		selected_d		<=	artm_d	when "00",
 							mem_d	when "01",
 							fop_d	when "10",
 							debug	when others;
 	with ctrl_d select	
-		selected_addr_d	<=	alu_addr_d	when "00",
+		selected_addr_d	<=	artm_addr_d	when "00",
 							mem_addr_d	when "01",
 							fop_addr_d	when "10",
 							"000"		when others;
@@ -89,7 +89,7 @@ begin
 	--Bypasses and immed routing
 	with bypass_a select
 		a_regsource	<=	rf_a	when "00",
-						alu_d	when "01",
+						artm_d	when "01",
 						mem_d	when "10",
 						fop_d	when "11";
 	
@@ -100,13 +100,13 @@ begin
 	
 	with bypass_b select
 		b	<=	rf_b	when "00",
-				alu_d	when "01",
+				artm_d	when "01",
 				mem_d	when "10",
 				fop_d	when "11";
 
 	with bypass_mem select
-		mem_data	<=	rf_a		when "00",
-						alu_d	when "01",
+		mem_data	<=	rf_a	when "00",
+						artm_d	when "01",
 						mem_d	when "10",
 						fop_d	when "11";
 

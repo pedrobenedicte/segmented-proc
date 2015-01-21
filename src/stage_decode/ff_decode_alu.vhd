@@ -13,9 +13,7 @@ entity ff_decode_alu is
 		b_in		: in	std_logic_vector(15 downto 0);
 		b_out		: out	std_logic_vector(15 downto 0);
 		mem_data_in	: in	std_logic_vector(15 downto 0);
-		mem_data_out: out	std_logic_vector(15 downto 0);
-		rdest_in	: in	std_logic_vector(2 downto 0);
-		rdest_out	: out	std_logic_vector(2 downto 0)
+		mem_data_out: out	std_logic_vector(15 downto 0)
 	);
 end ff_decode_alu;
 
@@ -33,9 +31,7 @@ begin
 				a_out <= a_in;
 				b_out <= b_in;
 				mem_data_out <= mem_data_in;
-				rdest_out <= rdest_in;
 			end if;
-		
 		end if;
 	end process;
 
