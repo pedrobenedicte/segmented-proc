@@ -23,23 +23,6 @@ architecture Structure OF datapath is
 
 	
 	component stage_decode is
-	port (
-		clk			: in	std_logic;
-		wrd			: in	std_logic;
-		alu_d		: in	std_logic_vector(15 downto 0);
-		mem_d		: in	std_logic_vector(15 downto 0);
-		fop_d		: in	std_logic_vector(15 downto 0);
-		addr_a		: in	std_logic_vector(2 downto 0);
-		addr_b		: in	std_logic_vector(2 downto 0);
-		alu_addr_d	: in	std_logic_vector(2 downto 0);
-		mem_addr_d	: in	std_logic_vector(2 downto 0);
-		fop_addr_d	: in	std_logic_vector(2 downto 0);
-		a			: out	std_logic_vector(15 downto 0);
-		b			: out	std_logic_vector(15 downto 0);
-		ctrl_d		: in 	std_logic_vector(1 downto 0);
-		mem_data	: out	std_logic_vector(15 downto 0);
-		rdest		: out	std_logic_vector(2 downto 0)
-	);
 	end component;
 
 	component ff_decode_alu is

@@ -83,8 +83,8 @@ begin
 					elsif (hit(4) = '1') then
 						page_physical <= tlb(4)(9 downto 0);
 					else
-						page_physical <= '0000000000';
-					end if;					
+						page_physical <= "0000000000";
+					end if;
 				end if;
 			end if;
 		end if;

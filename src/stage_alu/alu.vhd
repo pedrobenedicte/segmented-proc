@@ -17,12 +17,22 @@ end alu;
 
 architecture Structure of alu is
 	
+	function BOOLEAN_TO_STD_LOGIC(L: BOOLEAN) return std_ulogic is
+	begin
+		if L then
+			return('1');
+		else
+			return('0');
+		end if;
+	 end function BOOLEAN_TO_STD_LOGIC; 
+	
 	constant NOP	: std_logic_vector(2 downto 0) := "000";
 	constant MEM	: std_logic_vector(2 downto 0) := "001";
 	constant ART	: std_logic_vector(2 downto 0) := "010";
 	constant BNZ	: std_logic_vector(2 downto 0) := "011";
 	constant FOP	: std_logic_vector(2 downto 0) := "100";
 	
+	constant zero	: std_logic_vector(15 downto 0) := "0000000000000000";
 	constant debug	: std_logic_vector(15 downto 0) := "1010101010101010";
 	signal wLogAritm: std_logic_vector(15 downto 0);
 	signal wMem		: std_logic_vector(15 downto 0);
@@ -32,11 +42,11 @@ begin
 	z <= BOOLEAN_TO_STD_LOGIC(SIGNED(y)=0);
 	
 	with opclass select
-		w <=	0			when NOP,
+		w <=	zero		when NOP,
 				wMem		when MEM,
 				wLogAritm	when ART,
-				0			when BNZ,
-				0			when FOP,
+				zero		when BNZ,
+				zero		when FOP,
 				debug		when others;
 	
 	with opcode select

@@ -1,7 +1,7 @@
 LIBRARY ieee;
 use ieee.std_logic_1164.all;
 use IEEE.numeric_std.all;
-use ieee.std_logic_unsigned.all;
+use IEEE.std_logic_arith.all;
 
 entity control_unit is
 	port (
@@ -30,7 +30,7 @@ architecture Structure of control_unit is
 	
 	signal rstages : reg_stages;
 	
-	-- Instruction decode signas
+	-- Instruction decode signlas
 		constant NOP	: std_logic_vector(2 downto 0) := "000";
 		constant MEM	: std_logic_vector(2 downto 0) := "001";
 		constant ART	: std_logic_vector(2 downto 0) := "010";
@@ -39,17 +39,11 @@ architecture Structure of control_unit is
 		
 		signal opclass	: std_logic_vector(2 downto 0);
 		signal opcode	: std_logic_vector(1 downto 0);
-		signal immed	: std_logic_vector(7 downto 0); -- 8 for bnz, 5 for mem
+		signal immed	: std_logic_vector(15 downto 0); -- 8 for bnz, 5 for mem
 		signal addr_d	: std_logic_vector(2 downto 0);
 		signal addr_a	: std_logic_vector(2 downto 0);
 		signal addr_b	: std_logic_vector(2 downto 0);
 	
-	-- Bypasses signals
-		signal bp_alu_a	: std_logic_vector(1 downto 0);
-		signal bp_alu_b	: std_logic_vector(1 downto 0);
-
-		signal bp_dec_a	: std_logic_vector(1 downto 0);
-		signal bp_dec_b	: std_logic_vector(1 downto 0);
 begin
 
 	-- Instruction decode
@@ -62,11 +56,10 @@ begin
 					ir(8 downto 6)	when ir(15 downto 13) = ART or 	ir(15 downto 13) = FOP;
 		
 		with ir(15 downto 13) select
-			immed	<=	"000"+ir(10 downto 6)	when MEM,
-						ir(10 downto 3)			when BNZ;
+			immed	<=	SXT(ir(10 DOWNTO 6),immed'length) when MEM, -- TODO change to extend sign
+						SXT(ir(10 DOWNTO 3),immed'length) when BNZ;
 	
-	-- Bypasses
-		
+
 	
 	
 	
