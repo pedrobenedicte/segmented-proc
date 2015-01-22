@@ -22,10 +22,10 @@ architecture behavior of test_tags_d is
 	signal clock		: std_logic := '0';
 	signal reset		: std_logic := '1';
 	signal we			: std_logic := '1';
-	signal rw			: std_logic := '1';
+	signal rw			: std_logic := '0';
 	signal hit 			: std_logic;
 	signal addr_in		: std_logic_vector(15 downto 0) := "1111111111001000";
-	signal phys_in		: std_logic_vector(15 downto 0) := "1010101010001000";
+	signal phys_in		: std_logic_vector(15 downto 0) := "1010101010000000";
 	signal tag_out		: std_logic_vector(9 downto 0);
 	signal wb			: std_logic;
 

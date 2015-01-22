@@ -4,7 +4,7 @@ use ieee.std_logic_unsigned.all;
 use ieee.std_logic_textio.all;
 use std.textio.all;
 
-entity tlb_d is
+entity cache_d is
 	port (
 		clk				: in std_logic;
 		boot			: in std_logic;
@@ -20,9 +20,8 @@ architecture Structure of tlb_d is
 	signal page_physical	: std_logic_vector(9 downto 0);
 	signal hit				: std_logic_vector(4 downto 0);
 	
-	-- 5 entries,       Valid | Logical page | Physical page
-	--                   1b   |     10b      |     10b
-	-- 105b tlb size
+	-- 8 lines, 64b each line
+	-- 512b tlb size
 	type tlb_table is array (4 downto 0) of std_logic_vector(20 downto 0);
 	signal tlb : tlb_table;
 
@@ -62,7 +61,7 @@ begin
 	
 	process (clk)
 	begin
-		if (clk'event and clk = '0') then
+		if (clk'event and clk = '1') then
 			if (boot = '1') then
 				Load_TLB_Data(tlb);
 			else

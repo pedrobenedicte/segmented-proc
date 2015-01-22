@@ -1,8 +1,8 @@
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
 use ieee.std_logic_textio.all;
 use std.textio.all;
-use ieee.numeric_std.all;
 
 entity tags_d is
 	port (
@@ -19,19 +19,19 @@ entity tags_d is
 end entity;
 
 architecture Structure of tags_d is
-	signal index		: std_logic_vector(3 downto 0);
+	signal index		: std_logic_vector(2 downto 0);
 	signal stored_tag	: std_logic_vector(9 downto 0);
 	signal valid		: std_logic;
 	signal dirty		: std_logic;
 	signal hit			: std_logic;
 	-- signal int_index	: integer;
 	
-	signal int_index : integer range 0 to 7;
+	-- signal int_index : integer range 0 to 7;
 	
-	-- 16 lines,       Valid | Dirty | Tag
-	--                  1b   |  1b   | 10b
-	-- 192b tags size
-	type tags_table is array (15 downto 0) of std_logic_vector(11 downto 0);
+	-- 8 lines,       Valid | Dirty | Tag
+	--                 1b   |  1b   | 10b
+	-- 96b tags size
+	type tags_table is array (7 downto 0) of std_logic_vector(11 downto 0);
 	signal tags : tags_table;
 	
 	-- Initialize Tags from file tags_d.txt
@@ -53,22 +53,21 @@ architecture Structure of tags_d is
 	
 	
 begin
-	--index <= add_logical(5 downto 2);
-	--int_index <= to_integer(unsigned(index));
-	int_index <= to_integer(unsigned(index));
+	index <= add_logical(5 downto 3);
 	hit_miss <= hit;
+	wb <= dirty and (not hit);
 	
 	process (clk)
 	begin
 		if (clk'event) then
-			if (clk = '1') then
+			if (clk = '0') then
 				if (boot = '1') then
 					Load_Tags_Data(tags);
 				else
 					if (we = '1') then
-						valid <= tags_table(int_index)(11);
-						dirty <= tags_table(int_index)(10);
-						stored_tag <= tags_table(int_index)(9 downto 0);
+						valid <= tags(conv_integer(index))(11);
+						dirty <= tags(conv_integer(index))(10);
+						stored_tag <= tags(conv_integer(index))(9 downto 0);
 						if ((stored_tag = add_physical(15 downto 6)) and (valid = '1')) then
 							hit <= '1';
 						else
@@ -79,11 +78,14 @@ begin
 			else
 				if (we = '1') then
 					if (hit = '0') then
-						tags_table(int_index)(11) <= '1';
-						tags_table(int_index)(10) <= not read_write;
-						tags_table(int_index)(9 downto 0) <= add_physical(15 downto 6);
+						if (dirty = '1') then
+							wb_tag <= tags(conv_integer(index))(9 downto 0);
+						end if;
+						tags(conv_integer(index))(11) <= '1';
+						tags(conv_integer(index))(10) <= not read_write;
+						tags(conv_integer(index))(9 downto 0) <= add_physical(15 downto 6);
 					else
-						tags_table(int_index)(10) <= (not read_write) or (tags_table(int_index)(10));
+						tags(conv_integer(index))(10) <= (not read_write) or (tags(conv_integer(index))(10));
 					end if;
 				end if;
 			end if;
