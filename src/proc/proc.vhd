@@ -15,8 +15,10 @@ architecture Structure of proc is
 		port (
 			clk					: in	std_logic;
 			boot				: in	std_logic;
-			stall_vector		: in	std_logic_vector(7 downto 0);
-			nop_vector			: in	std_logic_vector(7 downto 1);
+			base_stall_vector	: in	std_logic_vector(5 downto 0);
+			base_nop_vector		: in	std_logic_vector(5 downto 1);
+			fop_stall_vector	: in	std_logic_vector(7 downto 2);
+			fop_nop_vector		: in	std_logic_vector(7 downto 2);
 			
 			-- Fetch
 			fetch_pc			: in	std_logic_vector(15 downto 0);
@@ -65,8 +67,10 @@ architecture Structure of proc is
 		port (
 			clk					: in	std_logic;
 			boot				: in	std_logic;
-			stall_vector		: out	std_logic_vector(7 downto 0);
-			nop_vector			: out	std_logic_vector(7 downto 1);
+			base_stall_vector	: out	std_logic_vector(5 downto 0);
+			base_nop_vector		: out	std_logic_vector(5 downto 1);
+			fop_stall_vector	: out	std_logic_vector(7 downto 2);
+			fop_nop_vector		: out	std_logic_vector(7 downto 2);
 			
 			-- Fetch
 			fetch_pc			: out	std_logic_vector(15 downto 0);
@@ -112,8 +116,11 @@ architecture Structure of proc is
 	end component;
 	
 	signal boot					: std_logic;
-	signal stall_vector			: std_logic_vector(7 downto 0);
-	signal nop_vector			: std_logic_vector(7 downto 1);
+	signal base_stall_vector	: std_logic_vector(5 downto 0);
+	signal base_nop_vector		: std_logic_vector(5 downto 1);
+	signal fop_stall_vector		: std_logic_vector(7 downto 2);
+	signal fop_nop_vector		: std_logic_vector(7 downto 2);
+	
 	
 	-- Fetch
 	signal fetch_pc				: std_logic_vector(15 downto 0);
@@ -162,8 +169,10 @@ begin
 	port map (
 		clk					=> clk,
 		boot				=> boot,
-		stall_vector		=> stall_vector,
-		nop_vector			=> nop_vector,
+		base_stall_vector	=> base_stall_vector,
+		base_nop_vector		=> base_nop_vector,
+		fop_stall_vector	=> fop_stall_vector,
+		fop_nop_vector		=> fop_nop_vector,
 		
 		-- Fetch
 		fetch_pc			=> fetch_pc,
@@ -211,8 +220,10 @@ begin
 	port map (
 		clk					=> clk,
 		boot				=> boot,
-		stall_vector		=> stall_vector,
-		nop_vector			=> nop_vector,
+		base_stall_vector	=> base_stall_vector,
+		base_nop_vector		=> base_nop_vector,
+		fop_stall_vector	=> fop_stall_vector,
+		fop_nop_vector		=> fop_nop_vector,
 		
 		-- Fetch
 		fetch_pc			=> fetch_pc,

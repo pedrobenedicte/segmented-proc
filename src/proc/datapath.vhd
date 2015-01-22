@@ -7,8 +7,10 @@ entity datapath is
 	port (
 		clk					: in	std_logic;
 		boot				: in	std_logic;
-		stall_vector		: in	std_logic_vector(7 downto 0);
-		nop_vector			: in	std_logic_vector(7 downto 1);
+		base_stall_vector	: in	std_logic_vector(5 downto 0);
+		base_nop_vector		: in	std_logic_vector(5 downto 1);
+		fop_stall_vector	: in	std_logic_vector(7 downto 2);
+		fop_nop_vector		: in	std_logic_vector(7 downto 2);
 		
 		-- Fetch
 		fetch_pc			: in	std_logic_vector(15 downto 0);
@@ -213,11 +215,69 @@ architecture Structure OF datapath is
 		);
 	end component;
 	
+	component stage_f1 is
+		port (
+			clk			: in	std_logic;
+			stall		: in	std_logic;
+			nop			: in	std_logic;
+			
+			-- flipflop inputs
+			ff_a		: in	std_logic_vector(15 downto 0);
+			ff_b		: in	std_logic_vector(15 downto 0);
+			
+			fop_data	: out	std_logic_vector(15 downto 0)
+		);
+	end component;
+	
+	component stage_f2 is
+		port (
+			clk			: in	std_logic;
+			stall		: in	std_logic;
+			nop			: in	std_logic;
+			
+			-- flipflop inputs
+			ff_fop_data	: in	std_logic_vector(15 downto 0);
+			
+			fop_data	: out	std_logic_vector(15 downto 0)
+		);
+	end component;
+	
+	component stage_f3 is
+		port (
+			clk			: in	std_logic;
+			stall		: in	std_logic;
+			nop			: in	std_logic;
+			
+			-- flipflop inputs
+			ff_fop_data	: in	std_logic_vector(15 downto 0);
+			
+			fop_data	: out	std_logic_vector(15 downto 0)
+		);
+	end component;
+	
+	component stage_f4 is
+		port (
+			clk			: in	std_logic;
+			stall		: in	std_logic;
+			nop			: in	std_logic;
+			
+			-- flipflop inputs
+			ff_fop_data	: in	std_logic_vector(15 downto 0);
+			
+			fop_data	: out	std_logic_vector(15 downto 0)
+		);
+	end component;
+	
 	component stage_f5 is
 		port (
 			clk			: in	std_logic;
 			stall		: in	std_logic;
-			nop			: in	std_logic
+			nop			: in	std_logic;
+			
+			-- flipflop inputs
+			ff_fop_data	: in	std_logic_vector(15 downto 0);
+			
+			fop_data	: out	std_logic_vector(15 downto 0)
 		);
 	end component;
 	
@@ -228,7 +288,7 @@ architecture Structure OF datapath is
 			nop			: in	std_logic;
 			
 			-- flipflop inputs
-			--ff_fop_data	: in	std_logic_vector(15 downto 0);
+			ff_fop_data	: in	std_logic_vector(15 downto 0);
 			
 			fop_data	: out	std_logic_vector(15 downto 0)
 		);
@@ -246,6 +306,12 @@ architecture Structure OF datapath is
 	signal l2c_addr_mem		: std_logic_vector(15 downto 0);
 	signal c2mwb_load_data	: std_logic_vector(15 downto 0);
 	
+	signal f1_f2_fop_data	: std_logic_vector(15 downto 0);
+	signal f2_f3_fop_data	: std_logic_vector(15 downto 0);
+	signal f3_f4_fop_data	: std_logic_vector(15 downto 0);
+	signal f4_f5_fop_data	: std_logic_vector(15 downto 0);
+	signal f5_fwb_fop_data	: std_logic_vector(15 downto 0);
+		
 	-- Return values & bypass data
 	signal aluwb_data		: std_logic_vector(15 downto 0);
 	signal memwb_data		: std_logic_vector(15 downto 0);
@@ -256,7 +322,7 @@ begin
 	fch	: stage_fetch
 	port map (
 		clk			=> clk,
-		stall		=> stall_vector(FETCH),
+		stall		=> base_stall_vector(FETCH),
 		pc			=> fetch_pc,
 		ir			=> f2d_ir
 	);
@@ -264,8 +330,8 @@ begin
 	dec	: stage_decode
 	port map (
 		clk			=> clk,
-		stall		=> stall_vector(DECODE),
-		nop			=> nop_vector(DECODE),
+		stall		=> base_stall_vector(DECODE),
+		nop			=> base_nop_vector(DECODE),
 		
 		-- flipflop inputs
 		ff_ir		=> f2d_ir,
@@ -304,8 +370,8 @@ begin
 	alu0 : stage_alu
 	port map (
 		clk			=> clk,
-		stall		=> stall_vector(ALU),
-		nop			=> nop_vector(ALU),
+		stall		=> base_stall_vector(ALU),
+		nop			=> base_nop_vector(ALU),
 		
 		-- flipflop inputs
 		ff_a		=> d2a_a,
@@ -331,8 +397,8 @@ begin
 	port map (
 		clk			=> clk,
 		boot		=> boot,
-		stall		=> stall_vector(LOOKUP),
-		nop			=> nop_vector(LOOKUP),
+		stall		=> base_stall_vector(LOOKUP),
+		nop			=> base_nop_vector(LOOKUP),
 		
 		-- Data tlb
 		we_dtlb			=> we_dtlb,
@@ -360,8 +426,8 @@ begin
 	ch	: stage_cache
 	port map (
 		clk			=> clk,
-		stall		=> stall_vector(CACHE),
-		nop			=> nop_vector(CACHE),
+		stall		=> base_stall_vector(CACHE),
+		nop			=> base_nop_vector(CACHE),
 		
 		-- flipflop inputs
 		ff_addr_mem	=> l2c_addr_mem,
@@ -378,8 +444,8 @@ begin
 	wb	: stage_wb
 	port map (
 		clk			=> clk,
-		stall		=> stall_vector(MEMWB),
-		nop			=> nop_vector(MEMWB),
+		stall		=> base_stall_vector(MEMWB),
+		nop			=> base_nop_vector(MEMWB),
 		
 		-- flipflop inputs
 		ff_load_data=> c2mwb_load_data,
@@ -387,21 +453,76 @@ begin
 		load_data	=> memwb_data
 	);
 	
+	
+	f1	: stage_f1
+	port map (
+		clk			=> clk,
+		stall		=> fop_stall_vector(FOP1),
+		nop			=> fop_nop_vector(FOP1),
+		
+		-- flipflop inputs
+		ff_a		=> d2a_a,
+		ff_b		=> d2a_b,
+		
+		fop_data	=> f1_f2_fop_data
+	);
+	
+	f2	: stage_f2
+	port map (
+		clk			=> clk,
+		stall		=> fop_stall_vector(FOP2),
+		nop			=> fop_nop_vector(FOP2),
+		
+		-- flipflop inputs
+		ff_fop_data	=> f1_f2_fop_data,
+		
+		fop_data	=> f2_f3_fop_data
+	);
+	
+	f3	: stage_f3
+	port map (
+		clk			=> clk,
+		stall		=> fop_stall_vector(FOP3),
+		nop			=> fop_nop_vector(FOP3),
+		
+		-- flipflop inputs
+		ff_fop_data	=> f2_f3_fop_data,
+		
+		fop_data	=> f3_f4_fop_data
+	);
+	
+	f4	: stage_f4
+	port map (
+		clk			=> clk,
+		stall		=> fop_stall_vector(FOP4),
+		nop			=> fop_nop_vector(FOP4),
+		
+		-- flipflop inputs
+		ff_fop_data	=> f3_f4_fop_data,
+		
+		fop_data	=> f4_f5_fop_data
+	);
+	
 	f5	: stage_f5
 	port map (
 		clk			=> clk,
-		stall		=> stall_vector(FOP5),
-		nop			=> nop_vector(FOP5)
+		stall		=> fop_stall_vector(FOP5),
+		nop			=> fop_nop_vector(FOP5),
+		
+		-- flipflop inputs
+		ff_fop_data	=> f4_f5_fop_data,
+		
+		fop_data	=> f5_fwb_fop_data
 	);
 	
 	fwb	: stage_fwb
 	port map (
 		clk			=> clk,
-		stall		=> stall_vector(FOPWB),
-		nop			=> nop_vector(FOPWB),
+		stall		=> fop_stall_vector(FOPWB),
+		nop			=> fop_nop_vector(FOPWB),
 		
 		-- flipflop inputs
-		--ff_fop_data=> ,
+		ff_fop_data=> f5_fwb_fop_data,
 		
 		fop_data	=> fopwb_data
 	);

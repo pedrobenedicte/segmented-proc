@@ -7,8 +7,10 @@ entity control_unit is
 	port (
 		clk					: in	std_logic;
 		boot				: in	std_logic;
-		stall_vector		: out	std_logic_vector(7 downto 0);
-		nop_vector			: out	std_logic_vector(7 downto 1);
+		base_stall_vector	: out	std_logic_vector(5 downto 0);
+		base_nop_vector		: out	std_logic_vector(5 downto 1);
+		fop_stall_vector	: out	std_logic_vector(7 downto 2);
+		fop_nop_vector		: out	std_logic_vector(7 downto 2);
 		
 		-- Fetch
 		fetch_pc			: out	std_logic_vector(15 downto 0);
@@ -126,10 +128,10 @@ begin
 	
 	
 	with ctrl_pc select
-		newPC	<=	rstages(FETCH).pc+4		when "00",
-					rstages(FETCH).pc+jump	when "01",
+		newPC	<=	base_rstages(FETCH).pc+4		when "00",
+					base_rstages(FETCH).pc+jump	when "01",
 					EXCVECTOR				when "10",
-					rstages(FETCH).pc+4		when others;
+					base_rstages(FETCH).pc+4		when others;
 
 	-- Fetch signals assignation
 	fetch_pc	<=	rstages(FETCH).pc;
@@ -139,13 +141,13 @@ begin
 	begin
 		if (rising_edge(clk)) then
 			if boot = '1' then
-				rstages(FETCH).pc	<= "1100000000000000";
+				base_rstages(FETCH).pc	<= "1100000000000000";
 				-- inizialitation
 			else
 				-- if exception/interruption
 				-- elsif branch
 				-- else +4
-				rstages(FETCH).pc	<= newPC;
+				base_rstages(FETCH).pc	<= newPC;
 			end if;
 		end if;
 	end process;
