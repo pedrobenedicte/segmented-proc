@@ -10,7 +10,7 @@ entity stage_fwb is
 		nop			: in	std_logic;
 		
 		-- flipflop inputs
-		ff_fop_data: in	std_logic_vector(15 downto 0);
+		--ff_fop_data	: in	std_logic_vector(15 downto 0);
 		
 		fop_data	: out	std_logic_vector(15 downto 0)
 	);
@@ -25,9 +25,9 @@ begin
 	begin
 		if (rising_edge(clk)) then
 			if stall = '1' then
-			elsif nop = '1' then 
+			elsif nop = '1' then
 			else
-				fop_data 	<= ff_fop_data;
+				--fop_data 	<= ff_fop_data;
 			end if;
 		end if;
 	end process;

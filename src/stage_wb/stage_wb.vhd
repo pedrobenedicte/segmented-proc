@@ -26,7 +26,7 @@ begin
 	begin
 		if (rising_edge(clk)) then
 			if stall = '1' then
-			elsif nop = '1' then 
+			elsif nop = '1' then
 			else
 				load_data 	<= ff_load_data;
 			end if;

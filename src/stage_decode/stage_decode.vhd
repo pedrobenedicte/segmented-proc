@@ -11,15 +11,17 @@ entity stage_decode is
 		
 		-- flipflop inputs
 		ff_ir		: in	std_logic_vector(15 downto 0);
+		ff_opclass	: in	std_logic_vector(2 downto 0);
+		ff_opcode	: in	std_logic_vector(1 downto 0);
 		
 		-- Value and addr of d to be written in Regfile.
 		-- Also used as bypasses for a and b
 		artm_d		: in	std_logic_vector(15 downto 0);
 		mem_d		: in	std_logic_vector(15 downto 0);
 		fop_d		: in	std_logic_vector(15 downto 0);
-		artm_addr_d	: in	std_logic_vector(2 downto 0);
-		mem_addr_d	: in	std_logic_vector(2 downto 0);
-		fop_addr_d	: in	std_logic_vector(2 downto 0);
+		awb_addr_d	: in	std_logic_vector(2 downto 0);
+		mwb_addr_d	: in	std_logic_vector(2 downto 0);
+		fwb_addr_d	: in	std_logic_vector(2 downto 0);
 		
 		addr_a		: in	std_logic_vector(2 downto 0);
 		addr_b		: in	std_logic_vector(2 downto 0);
@@ -28,15 +30,17 @@ entity stage_decode is
 		
 		wrd			: in	std_logic;						-- Regfile enable write
 		ctrl_d		: in 	std_logic_vector(1 downto 0);	-- Select source for d write
-		ctrl_immed	: in 	std_logic;						-- Select immed over a to use it
+		ctrl_immed	: in	std_logic;						-- Select immed over a to use it
 		immed		: in	std_logic_vector(15 downto 0);
 		
 		-- Bypasses control
-		bypass_a	: in	std_logic_vector(1 downto 0);
-		bypass_b	: in	std_logic_vector(1 downto 0);
-		bypass_mem	: in	std_logic_vector(1 downto 0);
+		bp_ctrl_a	: in	std_logic_vector(1 downto 0);
+		bp_ctrl_b	: in	std_logic_vector(1 downto 0);
+		bp_ctrl_mem	: in	std_logic_vector(1 downto 0);
 		
 		ir			: out	std_logic_vector(15 downto 0);
+		opclass		: out	std_logic_vector(2 downto 0);
+		opcode		: out	std_logic_vector(1 downto 0);
 		mem_data	: out	std_logic_vector(15 downto 0)
 	);
 end stage_decode;
@@ -87,13 +91,13 @@ begin
 							fop_d	when "10",
 							debug	when others;
 	with ctrl_d select	
-		selected_addr_d	<=	artm_addr_d	when "00",
-							mem_addr_d	when "01",
-							fop_addr_d	when "10",
+		selected_addr_d	<=	awb_addr_d	when "00",
+							mwb_addr_d	when "01",
+							fwb_addr_d	when "10",
 							"000"		when others;
 
 	--Bypasses and immed routing
-	with bypass_a select
+	with bp_ctrl_a select
 		a_regsource	<=	rf_a	when "00",
 						artm_d	when "01",
 						mem_d	when "10",
@@ -104,13 +108,13 @@ begin
 				immed		when '1';
 	
 	
-	with bypass_b select
+	with bp_ctrl_b select
 		b	<=	rf_b	when "00",
 				artm_d	when "01",
 				mem_d	when "10",
 				fop_d	when "11";
 
-	with bypass_mem select
+	with bp_ctrl_mem select
 		mem_data	<=	rf_a	when "00",
 						artm_d	when "01",
 						mem_d	when "10",
@@ -120,9 +124,11 @@ begin
 	begin
 		if (rising_edge(clk)) then
 			if stall = '1' then
-			elsif nop = '1' then 
+			elsif nop = '1' then
 			else
 				ir 	<= ff_ir;
+				opclass	<= ff_opclass;
+				opcode	<= ff_opcode;
 			end if;
 		end if;
 	end process;

@@ -5,36 +5,39 @@ use IEEE.std_logic_arith.all;
 
 entity control_unit is
 	port (
-		clk			: in	std_logic;
-		ir			: in	std_logic_vector(15 downto 0);
-		bp_alu_a	: out	std_logic_vector(1 downto 0);
-		bp_alu_b	: out	std_logic_vector(1 downto 0);
-		bp_dec_a	: out	std_logic_vector(1 downto 0);
-		bp_dec_b	: out	std_logic_vector(1 downto 0);
+		clk					: in	std_logic;
+		stall_vector		: out	std_logic_vector(7 downto 0);
+		nop_vector			: out	std_logic_vector(7 downto 1);
 		
-		-- Signals to/from fetch
+		-- Fetch
 		fetch_pc			: out	std_logic_vector(15 downto 0);
 		
-		-- Signals to/from decode
-		decode_ir			: out	std_logic_vector(15 downto 0);
+		-- Decode
+		decode_opclass		: out	std_logic_vector(2 downto 0);
+		decode_opcode		: out	std_logic_vector(1 downto 0);
 		
-		decode_artm_addr_d	: out	std_logic_vector(2 downto 0);
-		decode_mem_addr_d	: out	std_logic_vector(2 downto 0);
-		decode_fop_addr_d	: out	std_logic_vector(2 downto 0);
+		decode_awb_addr_d	: out	std_logic_vector(2 downto 0);
+		decode_mwb_addr_d	: out	std_logic_vector(2 downto 0);
+		decode_fwb_addr_d	: out	std_logic_vector(2 downto 0);
 		
 		decode_addr_a		: out	std_logic_vector(2 downto 0);
 		decode_addr_b		: out	std_logic_vector(2 downto 0);
+		
 		decode_wrd			: out	std_logic;
-		decode_ctrl_d		: out 	std_logic_vector(1 downto 0);
-		decode_ctrl_immed	: out 	std_logic;
+		decode_ctrl_d		: out	std_logic_vector(1 downto 0);
+		decode_ctrl_immed	: out	std_logic;
 		decode_immed		: out	std_logic_vector(15 downto 0);
 		
+		decode_ir			: in	std_logic_vector(15 downto 0);
+		
+		-- Alu
+		alu_w				: in	std_logic_vector(15 downto 0);
+		alu_z				: in	std_logic;
+		
 		-- Bypasses control
-		decode_bypass_a		: out	std_logic_vector(1 downto 0);
-		decode_bypass_b		: out	std_logic_vector(1 downto 0);
-		decode_bypass_mem	: out	std_logic_vector(1 downto 0);
-		
-		
+		bypasses_ctrl_a		: out	std_logic_vector(3 downto 0); -- D, A
+		bypasses_ctrl_b		: out	std_logic_vector(3 downto 0); -- D, A
+		bypasses_ctrl_mem	: out	std_logic_vector(7 downto 0)  -- D, A, WB/L, C
 	);
 end control_unit;
 
@@ -50,21 +53,21 @@ architecture Structure of control_unit is
 		opclass	: std_logic_vector(2 downto 0);
 		opcode	: std_logic_vector(1 downto 0);
 	end record;
-	type reg_stages is array (0 to 7) of reg_stages_entry;
+	type reg_stages is array (7 downto 0) of reg_stages_entry;
 	
 	signal rstages	: reg_stages;
 	
 	signal newPC	: std_logic_vector(15 downto 0);
 	
 	-- Defines
-		constant FETCH	: std_logic	:= '0';
-		constant DECODE	: std_logic	:= '1';
-		constant ALU	: std_logic	:= '2';
-		constant LOOKUP	: std_logic	:= '3';
-		constant CACHE	: std_logic	:= '4';
-		constant MEMWB	: std_logic	:= '5';
-		constant F5		: std_logic	:= '6';
-		constant FOPWB	: std_logic	:= '7';
+		constant FETCH	: integer	:= 0;
+		constant DECODE	: integer	:= 1;
+		constant ALU	: integer	:= 2;
+		constant LOOKUP	: integer	:= 3;
+		constant CACHE	: integer	:= 4;
+		constant MEMWB	: integer	:= 5;
+		constant FOP5	: integer	:= 6;
+		constant FOPWB	: integer	:= 7;
 		constant EXCVECTOR	: std_logic_vector(15 downto 0) := "0001000000000000";
 	
 	-- Instruction decode signlas
@@ -82,8 +85,10 @@ architecture Structure of control_unit is
 		signal addr_b	: std_logic_vector(2 downto 0);
 	
 	signal ctrl_pc	: std_logic_vector(1 downto 0) := "00";
+	signal ir		: std_logic_vector(15 downto 0);
 	
 begin
+	ir <= decode_ir;
 
 	-- Instruction decode
 		opclass	<= ir(15 downto 13);
@@ -95,7 +100,7 @@ begin
 					ir(8 downto 6)	when ir(15 downto 13) = ART or 	ir(15 downto 13) = FOP;
 		
 		with ir(15 downto 13) select
-			immed	<=	SXT(ir(10 DOWNTO 6),immed'length) when MEM, -- TODO change to extend sign
+			immed	<=	SXT(ir(10 DOWNTO 6),immed'length) when MEM,
 						SXT(ir(10 DOWNTO 3),immed'length) when BNZ;
 	
 	
