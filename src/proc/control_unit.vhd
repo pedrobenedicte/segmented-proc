@@ -6,6 +6,7 @@ use IEEE.std_logic_arith.all;
 entity control_unit is
 	port (
 		clk					: in	std_logic;
+		boot				: in	std_logic;
 		stall_vector		: out	std_logic_vector(7 downto 0);
 		nop_vector			: out	std_logic_vector(7 downto 1);
 		
@@ -34,6 +35,17 @@ entity control_unit is
 		alu_w				: in	std_logic_vector(15 downto 0);
 		alu_z				: in	std_logic;
 		
+		-- Lookup
+		-- Data tlb
+		we_dtlb				: out 	std_logic;
+		hit_miss_dtlb		: in	std_logic;
+
+		-- Data tags cache
+		we_dtags			: out 	std_logic;
+		read_write_dtags	: out 	std_logic;
+		hit_miss_dtags		: in	std_logic;
+		wb_dtags			: in	std_logic;
+		
 		-- Bypasses control
 		bypasses_ctrl_a		: out	std_logic_vector(3 downto 0); -- D, A
 		bypasses_ctrl_b		: out	std_logic_vector(3 downto 0); -- D, A
@@ -53,9 +65,12 @@ architecture Structure of control_unit is
 		opclass	: std_logic_vector(2 downto 0);
 		opcode	: std_logic_vector(1 downto 0);
 	end record;
-	type reg_stages is array (7 downto 0) of reg_stages_entry;
 	
-	signal rstages	: reg_stages;
+	type base_reg_stages is array (5 downto 0) of reg_stages_entry;
+	type fop_reg_stages is array (7 downto 2) of reg_stages_entry;
+	
+	signal base_rstages	: base_reg_stages;
+	signal fop_rstages	: fop_reg_stages;
 	
 	signal newPC	: std_logic_vector(15 downto 0);
 	
@@ -66,8 +81,14 @@ architecture Structure of control_unit is
 		constant LOOKUP	: integer	:= 3;
 		constant CACHE	: integer	:= 4;
 		constant MEMWB	: integer	:= 5;
+		
+		constant FOP1	: integer	:= 2;
+		constant FOP2	: integer	:= 3;
+		constant FOP3	: integer	:= 4;
+		constant FOP4	: integer	:= 5;
 		constant FOP5	: integer	:= 6;
 		constant FOPWB	: integer	:= 7;
+		
 		constant EXCVECTOR	: std_logic_vector(15 downto 0) := "0001000000000000";
 	
 	-- Instruction decode signlas

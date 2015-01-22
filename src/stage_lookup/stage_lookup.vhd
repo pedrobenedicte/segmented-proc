@@ -5,21 +5,33 @@ use ieee.std_logic_unsigned.all;
 
 entity stage_lookup is
 	port (
-		clk			: in	std_logic;
-		stall		: in	std_logic;
-		nop			: in	std_logic;
+		clk				: in	std_logic;
+		stall			: in	std_logic;
+		nop				: in	std_logic;
+		boot			: in 	std_logic;
+		
+		-- Data tlb
+		we_dtlb			: in 	std_logic;
+		hit_miss_dtlb	: out	std_logic;
+		
+		-- Data tags cache
+		we_dtags		: in 	std_logic;
+		read_write_dtags: in 	std_logic;
+		hit_miss_dtags	: out	std_logic;
+		wb_dtags		: out	std_logic;
 		
 		-- flipflop inputs
-		ff_addr_mem	: in	std_logic_vector(15 downto 0);
-		ff_mem_data	: in	std_logic_vector(15 downto 0);
+		ff_addr_mem		: in	std_logic_vector(15 downto 0);
+		ff_mem_data		: in	std_logic_vector(15 downto 0);
 		
 		-- Bypasses control and sources
-		bp_ctrl_mem	: in	std_logic_vector(1 downto 0);
-		bp_data_mwb	: in	std_logic_vector(15 downto 0);
-		bp_data_fwb	: in	std_logic_vector(15 downto 0);
+		bp_ctrl_mem		: in	std_logic_vector(1 downto 0);
+		bp_data_mwb		: in	std_logic_vector(15 downto 0);
+		bp_data_fwb		: in	std_logic_vector(15 downto 0);
 		
-		aluwb		: out	std_logic_vector(15 downto 0);
-		mem_data	: out	std_logic_vector(15 downto 0)
+		aluwb			: out	std_logic_vector(15 downto 0);
+		addr_mem		: out	std_logic_vector(15 downto 0);
+		mem_data		: out	std_logic_vector(15 downto 0)
 	);
 end stage_lookup;
 
@@ -28,7 +40,7 @@ architecture Structure of stage_lookup is
 
 	constant debug			: std_logic_vector(15 downto 0) := "1010101010101010";
 	
-	signal addr_mem			: std_logic_vector(15 downto 0);
+	signal addr_mem_logical	: std_logic_vector(15 downto 0);
 	signal mem_data_inside	: std_logic_vector(15 downto 0);
 	
 
@@ -47,10 +59,10 @@ begin
 			elsif nop = '1' then
 			else
 				aluwb			<= ff_addr_mem;
-				addr_mem 		<= ff_addr_mem;
+				addr_mem_logical<= ff_addr_mem;
 				mem_data_inside	<= ff_mem_data;
 			end if;
 		end if;
 	end process;
-							
+	
 end Structure;

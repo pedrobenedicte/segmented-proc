@@ -14,6 +14,7 @@ architecture Structure of proc is
 	component datapath is
 		port (
 			clk					: in	std_logic;
+			boot				: in	std_logic;
 			stall_vector		: in	std_logic_vector(7 downto 0);
 			nop_vector			: in	std_logic_vector(7 downto 1);
 			
@@ -42,6 +43,17 @@ architecture Structure of proc is
 			alu_w				: out	std_logic_vector(15 downto 0);
 			alu_z				: out	std_logic;
 			
+			-- Lookup
+			-- Data tlb
+			we_dtlb				: in 	std_logic;
+			hit_miss_dtlb		: out	std_logic;
+			
+			-- Data tags cache
+			we_dtags			: in 	std_logic;
+			read_write_dtags	: in 	std_logic;
+			hit_miss_dtags		: out	std_logic;
+			wb_dtags			: out	std_logic;
+			
 			-- Bypasses control
 			bypasses_ctrl_a		: in	std_logic_vector(3 downto 0); -- D, A
 			bypasses_ctrl_b		: in	std_logic_vector(3 downto 0); -- D, A
@@ -52,6 +64,7 @@ architecture Structure of proc is
 	component control_unit is
 		port (
 			clk					: in	std_logic;
+			boot				: in	std_logic;
 			stall_vector		: out	std_logic_vector(7 downto 0);
 			nop_vector			: out	std_logic_vector(7 downto 1);
 			
@@ -80,41 +93,64 @@ architecture Structure of proc is
 			alu_w				: in	std_logic_vector(15 downto 0);
 			alu_z				: in	std_logic;
 			
+			-- Lookup
+			-- Data tlb
+			we_dtlb				: out 	std_logic;
+			hit_miss_dtlb		: in	std_logic;
+			
+			-- Data tags cache
+			we_dtags			: out 	std_logic;
+			read_write_dtags	: out 	std_logic;
+			hit_miss_dtags		: in	std_logic;
+			wb_dtags			: in	std_logic;
+			
 			-- Bypasses control
 			bypasses_ctrl_a		: out	std_logic_vector(3 downto 0); -- D, A
 			bypasses_ctrl_b		: out	std_logic_vector(3 downto 0); -- D, A
 			bypasses_ctrl_mem	: out	std_logic_vector(7 downto 0)  -- D, A, WB/L, C
 		);
 	end component;
-
+	
+	signal boot					: std_logic;
 	signal stall_vector			: std_logic_vector(7 downto 0);
 	signal nop_vector			: std_logic_vector(7 downto 1);
-			
+	
 	-- Fetch
 	signal fetch_pc				: std_logic_vector(15 downto 0);
-			
+	
 	-- Decode
 	signal decode_opclass		: std_logic_vector(2 downto 0);
 	signal decode_opcode		: std_logic_vector(1 downto 0);
-			
+	
 	signal decode_awb_addr_d	: std_logic_vector(2 downto 0);
 	signal decode_mwb_addr_d	: std_logic_vector(2 downto 0);
 	signal decode_fwb_addr_d	: std_logic_vector(2 downto 0);
-			
+	
 	signal decode_addr_a		: std_logic_vector(2 downto 0);
 	signal decode_addr_b		: std_logic_vector(2 downto 0);
-			
+	
 	signal decode_wrd			: std_logic;
 	signal decode_ctrl_d		: std_logic_vector(1 downto 0);
 	signal decode_ctrl_immed	: std_logic;
 	signal decode_immed			: std_logic_vector(15 downto 0);
-			
+	
 	signal decode_ir			: std_logic_vector(15 downto 0);
-			
+	
 	-- Alu
 	signal alu_w				: std_logic_vector(15 downto 0);
 	signal alu_z				: std_logic;
-			
+
+	-- Lookup
+	-- Data tlb
+	signal we_dtlb			: std_logic;
+	signal hit_miss_dtlb	: std_logic;
+
+	-- Data tags cache
+	signal we_dtags			: std_logic;
+	signal read_write_dtags	: std_logic;
+	signal hit_miss_dtags	: std_logic;
+	signal wb_dtags			: std_logic;
+	
 	-- Bypasses control
 	signal bypasses_ctrl_a		: std_logic_vector(3 downto 0); -- D, A
 	signal bypasses_ctrl_b		: std_logic_vector(3 downto 0); -- D, A
@@ -125,6 +161,7 @@ begin
 	dp : datapath
 	port map (
 		clk					=> clk,
+		boot				=> boot,
 		stall_vector		=> stall_vector,
 		nop_vector			=> nop_vector,
 		
@@ -152,6 +189,17 @@ begin
 		-- Alu
 		alu_w				=> alu_w,
 		alu_z				=> alu_z,
+		
+		-- Lookup
+		-- Data tlb
+		we_dtlb				=> we_dtlb,
+		hit_miss_dtlb		=> hit_miss_dtlb,
+
+		-- Data tags cache
+		we_dtags			=> we_dtags,
+		read_write_dtags	=> read_write_dtags,
+		hit_miss_dtags		=> hit_miss_dtags,
+		wb_dtags			=> wb_dtags,
 		
 		-- Bypasses control
 		bypasses_ctrl_a		=> bypasses_ctrl_a,
@@ -162,6 +210,7 @@ begin
 	ctrl : control_unit
 	port map (
 		clk					=> clk,
+		boot				=> boot,
 		stall_vector		=> stall_vector,
 		nop_vector			=> nop_vector,
 		
@@ -189,6 +238,17 @@ begin
 		-- Alu
 		alu_w				=> alu_w,
 		alu_z				=> alu_z,
+		
+		-- Lookup
+		-- Data tlb
+		we_dtlb				=> we_dtlb,
+		hit_miss_dtlb		=> hit_miss_dtlb,
+
+		-- Data tags cache
+		we_dtags			=> we_dtags,
+		read_write_dtags	=> read_write_dtags,
+		hit_miss_dtags		=> hit_miss_dtags,
+		wb_dtags			=> wb_dtags,
 		
 		-- Bypasses control
 		bypasses_ctrl_a		=> bypasses_ctrl_a,

@@ -6,6 +6,7 @@ use ieee.std_logic_unsigned.all;
 entity datapath is 
 	port (
 		clk					: in	std_logic;
+		boot				: in	std_logic;
 		stall_vector		: in	std_logic_vector(7 downto 0);
 		nop_vector			: in	std_logic_vector(7 downto 1);
 		
@@ -34,6 +35,17 @@ entity datapath is
 		alu_w				: out	std_logic_vector(15 downto 0);
 		alu_z				: out	std_logic;
 		
+		-- Lookup
+		-- Data tlb
+		we_dtlb				: in 	std_logic;
+		hit_miss_dtlb		: out	std_logic;
+		
+		-- Data tags cache
+		we_dtags			: in 	std_logic;
+		read_write_dtags	: in 	std_logic;
+		hit_miss_dtags		: out	std_logic;
+		wb_dtags			: out	std_logic;
+		
 		-- Bypasses control
 		bypasses_ctrl_a		: in	std_logic_vector(3 downto 0); -- D, A
 		bypasses_ctrl_b		: in	std_logic_vector(3 downto 0); -- D, A
@@ -51,6 +63,11 @@ architecture Structure OF datapath is
 		constant LOOKUP	: integer	:= 3;
 		constant CACHE	: integer	:= 4;
 		constant MEMWB	: integer	:= 5;
+		
+		constant FOP1	: integer	:= 2;
+		constant FOP2	: integer	:= 3;
+		constant FOP3	: integer	:= 4;
+		constant FOP4	: integer	:= 5;
 		constant FOP5	: integer	:= 6;
 		constant FOPWB	: integer	:= 7;
 
@@ -134,21 +151,33 @@ architecture Structure OF datapath is
 	
 	component stage_lookup is
 		port (
-			clk			: in	std_logic;
-			stall		: in	std_logic;
-			nop			: in	std_logic;
+			clk				: in	std_logic;
+			stall			: in	std_logic;
+			nop				: in	std_logic;
+			boot			: in 	std_logic;
+			
+			-- Data tlb
+			we_dtlb			: in 	std_logic;
+			hit_miss_dtlb	: out	std_logic;
+			
+			-- Data tags cache
+			we_dtags		: in 	std_logic;
+			read_write_dtags: in 	std_logic;
+			hit_miss_dtags	: out	std_logic;
+			wb_dtags		: out	std_logic;
 			
 			-- flipflop inputs
-			ff_addr_mem	: in	std_logic_vector(15 downto 0);
-			ff_mem_data	: in	std_logic_vector(15 downto 0);
+			ff_addr_mem		: in	std_logic_vector(15 downto 0);
+			ff_mem_data		: in	std_logic_vector(15 downto 0);
 			
 			-- Bypasses control and sources
-			bp_ctrl_mem	: in	std_logic_vector(1 downto 0);
-			bp_data_mwb	: in	std_logic_vector(15 downto 0);
-			bp_data_fwb	: in	std_logic_vector(15 downto 0);
+			bp_ctrl_mem		: in	std_logic_vector(1 downto 0);
+			bp_data_mwb		: in	std_logic_vector(15 downto 0);
+			bp_data_fwb		: in	std_logic_vector(15 downto 0);
 			
-			aluwb		: out	std_logic_vector(15 downto 0);
-			mem_data	: out	std_logic_vector(15 downto 0)
+			aluwb			: out	std_logic_vector(15 downto 0);
+			addr_mem		: out	std_logic_vector(15 downto 0);
+			mem_data		: out	std_logic_vector(15 downto 0)
 		);
 	end component;
 	
@@ -301,8 +330,19 @@ begin
 	lk	: stage_lookup
 	port map (
 		clk			=> clk,
+		boot		=> boot,
 		stall		=> stall_vector(LOOKUP),
 		nop			=> nop_vector(LOOKUP),
+		
+		-- Data tlb
+		we_dtlb			=> we_dtlb,
+		hit_miss_dtlb 	=> hit_miss_dtlb,
+
+		-- Data tags cache
+		we_dtags		=> we_dtags,
+		read_write_dtags=> read_write_dtags,
+		hit_miss_dtags	=> hit_miss_dtags,
+		wb_dtags		=> wb_dtags,
 		
 		-- flipflop inputs
 		ff_addr_mem	=> l2c_addr_mem,
