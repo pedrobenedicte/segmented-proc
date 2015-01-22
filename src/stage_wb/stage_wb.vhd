@@ -6,15 +6,31 @@ use ieee.std_logic_unsigned.all;
 entity stage_wb is
 	port (
 		clk			: in	std_logic;
-		rdest_in	: in	std_logic_vector(2 downto 0);
-		rdest_out	: out	std_logic_vector(2 downto 0)
+		stall		: in	std_logic;
+		nop			: in	std_logic;
+		
+		-- flipflop inputs
+		ff_load_data: in	std_logic_vector(15 downto 0);
+		
+		load_data	: out	std_logic_vector(15 downto 0)
 	);
 end stage_wb;
 
 
 architecture Structure of stage_wb is
 
-begin
-	rdest_out <= rdest_in;
 
+begin
+
+	process (clk)
+	begin
+		if (rising_edge(clk)) then
+			if stall = '1' then
+			elsif nop = '1' then 
+			else
+				load_data 	<= ff_load_data;
+			end if;
+		end if;
+	end process;
+	
 end Structure;

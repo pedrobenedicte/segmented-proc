@@ -6,6 +6,11 @@ use ieee.std_logic_unsigned.all;
 entity stage_decode is
 	port (
 		clk			: in	std_logic;
+		stall		: in	std_logic;
+		nop			: in	std_logic;
+		
+		-- flipflop inputs
+		ff_ir		: in	std_logic_vector(15 downto 0);
 		
 		-- Value and addr of d to be written in Regfile.
 		-- Also used as bypasses for a and b
@@ -31,6 +36,7 @@ entity stage_decode is
 		bypass_b	: in	std_logic_vector(1 downto 0);
 		bypass_mem	: in	std_logic_vector(1 downto 0);
 		
+		ir			: out	std_logic_vector(15 downto 0);
 		mem_data	: out	std_logic_vector(15 downto 0)
 	);
 end stage_decode;
@@ -109,5 +115,16 @@ begin
 						artm_d	when "01",
 						mem_d	when "10",
 						fop_d	when "11";
+
+	process (clk)
+	begin
+		if (rising_edge(clk)) then
+			if stall = '1' then
+			elsif nop = '1' then 
+			else
+				ir 	<= ff_ir;
+			end if;
+		end if;
+	end process;
 
 end Structure;

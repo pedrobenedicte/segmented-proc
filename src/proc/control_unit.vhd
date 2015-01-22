@@ -14,7 +14,27 @@ entity control_unit is
 		
 		-- Signals to/from fetch
 		fetch_pc			: out	std_logic_vector(15 downto 0);
-		fetch_ir			: in	std_logic_vector(15 downto 0)
+		
+		-- Signals to/from decode
+		decode_ir			: out	std_logic_vector(15 downto 0);
+		
+		decode_artm_addr_d	: out	std_logic_vector(2 downto 0);
+		decode_mem_addr_d	: out	std_logic_vector(2 downto 0);
+		decode_fop_addr_d	: out	std_logic_vector(2 downto 0);
+		
+		decode_addr_a		: out	std_logic_vector(2 downto 0);
+		decode_addr_b		: out	std_logic_vector(2 downto 0);
+		decode_wrd			: out	std_logic;
+		decode_ctrl_d		: out 	std_logic_vector(1 downto 0);
+		decode_ctrl_immed	: out 	std_logic;
+		decode_immed		: out	std_logic_vector(15 downto 0);
+		
+		-- Bypasses control
+		decode_bypass_a		: out	std_logic_vector(1 downto 0);
+		decode_bypass_b		: out	std_logic_vector(1 downto 0);
+		decode_bypass_mem	: out	std_logic_vector(1 downto 0);
+		
+		
 	);
 end control_unit;
 
@@ -61,7 +81,7 @@ architecture Structure of control_unit is
 		signal addr_a	: std_logic_vector(2 downto 0);
 		signal addr_b	: std_logic_vector(2 downto 0);
 	
-	signal ctrl_pc	: std_logic_vector(1 downto 0) :="00";
+	signal ctrl_pc	: std_logic_vector(1 downto 0) := "00";
 	
 begin
 
