@@ -14,7 +14,7 @@ entity cache_d is
 		add_physical	: in std_logic_vector(15 downto 0);
 		
 		memory_r_w		: out std_logic;
-		memory_address	: out std_logic_vector(9 downto 0);
+		memory_address	: out std_logic_vector(12 downto 0);
 		memory_in		: in std_logic_vector(63 downto 0);
 		memory_out		: out std_logic_vector(63 downto 0);
 		
@@ -75,38 +75,38 @@ begin
 						memory_r_w	<= '1';
 						data_out(7 downto 0) <= cache(index)(offset);
 						if (b_w = '0') then
-							data_out(15 downto 8) <= cache(index)(offset+"1");
+							data_out(15 downto 8) <= cache(index)(offset+"001");
 						end if;
 					else										-- load from memory
 						memory_r_w	<= '1';
-						memory_address	<= page;
+						memory_address	<= page & offset;
 						cache(index)(offset)		<= memory_in(63 downto 56);
-						cache(index)(offset+1)	<= memory_in(55 downto 48);
-						cache(index)(offset+2)	<= memory_in(47 downto 40);
-						cache(index)(offset+3)	<= memory_in(39 downto 32);
-						cache(index)(offset+4)	<= memory_in(31 downto 24);
-						cache(index)(offset+5)	<= memory_in(23 downto 16);
-						cache(index)(offset+6)	<= memory_in(15 downto 8);
-						cache(index)(offset+7)	<= memory_in(7 downto 0);
+						cache(index)(offset+"001")	<= memory_in(55 downto 48);
+						cache(index)(offset+"010")	<= memory_in(47 downto 40);
+						cache(index)(offset+"011")	<= memory_in(39 downto 32);
+						cache(index)(offset+"100")	<= memory_in(31 downto 24);
+						cache(index)(offset+"101")	<= memory_in(23 downto 16);
+						cache(index)(offset+"110")	<= memory_in(15 downto 8);
+						cache(index)(offset+"111")	<= memory_in(7 downto 0);
 					end if;
 				else
 					if (cache_mem = '1') then			-- store to cache
 						memory_r_w <= '1';
 						cache(index)(offset) <= data_out(7 downto 0);
 						if (b_w = '0') then
-							cache(index)(offset+"1") <= data_out(15 downto 8);
+							cache(index)(offset+"001") <= data_out(15 downto 8);
 						end if;
 					else										-- store to memory
 						memory_r_w	<= '0';
-						memory_address	<= page;
+						memory_address	<= page & offset;
 						memory_out(63 downto 56)	<= cache(index)(offset);
-						memory_out(55 downto 48)	<= cache(index)(offset+1);
-						memory_out(47 downto 40)	<= cache(index)(offset+2);
-						memory_out(39 downto 32)	<= cache(index)(offset+3);
-						memory_out(31 downto 24)	<= cache(index)(offset+4);
-						memory_out(23 downto 16)	<= cache(index)(offset+5);
-						memory_out(15 downto 8)		<= cache(index)(offset+6);
-						memory_out(7 downto 0)		<= cache(index)(offset+7);
+						memory_out(55 downto 48)	<= cache(index)(offset+"001");
+						memory_out(47 downto 40)	<= cache(index)(offset+"010");
+						memory_out(39 downto 32)	<= cache(index)(offset+"011");
+						memory_out(31 downto 24)	<= cache(index)(offset+"100");
+						memory_out(23 downto 16)	<= cache(index)(offset+"101");
+						memory_out(15 downto 8)		<= cache(index)(offset+"110");
+						memory_out(7 downto 0)		<= cache(index)(offset+"111");
 					end if;
 				end if;
 			end if;
