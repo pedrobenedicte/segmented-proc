@@ -8,7 +8,6 @@ entity stage_cache is
 		clk		: in	std_logic;
 		reset		: in std_logic;
 		stall		: in	std_logic;
-		nop			: in	std_logic;
 		
 		-- flipflop inputs
 		ff_addr_mem	: in	std_logic_vector(15 downto 0);
@@ -91,9 +90,7 @@ begin
 	process (clk)
 	begin
 		if (rising_edge(clk)) then
-			if stall = '1' then
-			elsif nop = '1' then
-			else
+			if not (stall = '1') then
 				addr_mem 	<= ff_addr_mem;
 				mem_data_lk	<= ff_mem_data;
 			end if;

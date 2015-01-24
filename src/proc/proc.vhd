@@ -53,7 +53,23 @@ architecture Structure of proc is
 			alu_w				: out	std_logic_vector(15 downto 0);
 			alu_z				: out	std_logic;
 			
-			-- Cache
+			-- Data Lookup & TLB
+			-- TLB exception
+			dlookup_exception	: out	std_logic;
+			-- Lookup
+			dlookup				: in	std_logic;
+			dlookup_load_store	: in	std_logic;
+			dlookup_hit_miss	: out	std_logic;
+			-- Write back
+			dlookup_write_back	: out	std_logic;
+			dlookup_wb_tag		: out	std_logic_vector(9 downto 0);
+			
+			-- Data Cache
+			-- Cache mode
+			dcache_mode_r_w		: in	std_logic;
+			dcache_mode_c_m		: in	std_logic;
+			-- Byte or word
+			dcache_size_b_w		: in	std_logic;
 			
 			-- Memories
 			-- Instructions memory
@@ -103,7 +119,23 @@ architecture Structure of proc is
 			alu_w				: in	std_logic_vector(15 downto 0);
 			alu_z				: in	std_logic;
 			
-			-- Cache
+			-- Data Lookup & TLB
+			-- TLB exception
+			dlookup_exception	: in	std_logic;
+			-- Lookup
+			dlookup				: out	std_logic;
+			dlookup_load_store	: out	std_logic;
+			dlookup_hit_miss	: in	std_logic;
+			-- Write back
+			dlookup_write_back	: in	std_logic;
+			dlookup_wb_tag		: in	std_logic_vector(9 downto 0);
+			
+			-- Data Cache
+			-- Cache mode
+			dcache_mode_r_w		: out	std_logic;
+			dcache_mode_c_m		: out	std_logic;
+			-- Byte or word
+			dcache_size_b_w		: out	std_logic;
 			
 			-- Bypasses control
 			bypasses_ctrl_a		: out	std_logic_vector(3 downto 0); -- A, F1
@@ -138,8 +170,23 @@ architecture Structure of proc is
 	signal alu_w				: std_logic_vector(15 downto 0);
 	signal alu_z				: std_logic;
 	
-	-- Cache
+	-- Data Lookup & TLB
+	-- TLB exception
+	signal dlookup_exception	: std_logic;
+	-- Lookup
+	signal dlookup				: std_logic;
+	signal dlookup_load_store	: std_logic;
+	signal dlookup_hit_miss		: std_logic;
+	-- Write back
+	signal dlookup_write_back	: std_logic;
+	signal dlookup_wb_tag		: std_logic_vector(9 downto 0);
 	
+	-- Data Cache
+	-- Cache mode
+	signal dcache_mode_r_w		: std_logic;
+	signal dcache_mode_c_m		: std_logic;
+	-- Byte or word
+	signal dcache_size_b_w		: std_logic;
 
 	-- Bypasses control
 	signal bypasses_ctrl_a		: std_logic_vector(3 downto 0); -- A
@@ -180,7 +227,23 @@ begin
 		alu_w				=> alu_w,
 		alu_z				=> alu_z,
 		
-		-- Cache
+		-- Data Lookup & TLB
+		-- TLB exception
+		dlookup_exception	=> dlookup_exception,
+		-- Lookup
+		dlookup				=> dlookup,
+		dlookup_load_store	=> dlookup_load_store,
+		dlookup_hit_miss	=> dlookup_hit_miss,
+		-- Write back
+		dlookup_write_back	=> dlookup_write_back,
+		dlookup_wb_tag		=> dlookup_wb_tag,
+
+		-- Data Cache
+		-- Cache mode
+		dcache_mode_r_w		=> dcache_mode_r_w,
+		dcache_mode_c_m		=> dcache_mode_c_m,
+		-- Byte or word
+		dcache_size_b_w		=> dcache_size_b_w,
 		
 		-- Memories
 		-- Instructions memory
@@ -230,7 +293,23 @@ begin
 		alu_w				=> alu_w,
 		alu_z				=> alu_z,
 		
-		-- Cache
+		-- Data Lookup & TLB
+		-- TLB exception
+		dlookup_exception	=> dlookup_exception,
+		-- Lookup
+		dlookup				=> dlookup,
+		dlookup_load_store	=> dlookup_load_store,
+		dlookup_hit_miss	=> dlookup_hit_miss,
+		-- Write back
+		dlookup_write_back	=> dlookup_write_back,
+		dlookup_wb_tag		=> dlookup_wb_tag,
+
+		-- Data Cache
+		-- Cache mode
+		dcache_mode_r_w		=> dcache_mode_r_w,
+		dcache_mode_c_m		=> dcache_mode_c_m,
+		-- Byte or word
+		dcache_size_b_w		=> dcache_size_b_w,
 		
 		-- Bypasses control
 		bypasses_ctrl_a		=> bypasses_ctrl_a,
