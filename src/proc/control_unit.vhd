@@ -7,8 +7,7 @@ entity control_unit is
 	port (
 		clk					: in	std_logic;
 		boot				: in	std_logic;
-		base_stall_vector	: out	std_logic_vector(5 downto 0);
-		fop_stall_vector	: out	std_logic_vector(7 downto 2);
+		stall_vector	: out	std_logic_vector(11 downto 0);
 		
 		-- Fetch
 		fetch_pc			: out	std_logic_vector(15 downto 0);
@@ -57,16 +56,17 @@ architecture Structure of control_unit is
 		opcode	: std_logic_vector(1 downto 0);
 	end record;
 	
-	type base_reg_stages is array (5 downto 0) of reg_stages_entry;
-	type fop_reg_stages is array (7 downto 2) of reg_stages_entry;
+	type base_reg_stages is array (11 downto 0) of reg_stages_entry;
 	
-	signal base_rstages	: base_reg_stages;
-	signal fop_rstages	: fop_reg_stages;
+	signal rstages	: reg_stages;
 	
 	signal newPC	: std_logic_vector(15 downto 0);
 
 	signal bypass_alu_ctrl_a	: std_logic_vector(1 downto 0);
 	signal bypass_alu_ctrl_b	: std_logic_vector(1 downto 0);
+	
+	signal bypass_fop_ctrl_a	: std_logic_vector(1 downto 0);
+	signal bypass_fop_ctrl_b	: std_logic_vector(1 downto 0);
 
 	signal bypass_alu_ctrl_mem	: std_logic_vector(1 downto 0);
 	signal bypass_lk_ctrl_mem	: std_logic_vector(1 downto 0);
@@ -80,12 +80,12 @@ architecture Structure of control_unit is
 		constant CACHE	: integer	:= 4;
 		constant MEMWB	: integer	:= 5;
 		
-		constant FOP1	: integer	:= 2;
-		constant FOP2	: integer	:= 3;
-		constant FOP3	: integer	:= 4;
-		constant FOP4	: integer	:= 5;
-		constant FOP5	: integer	:= 6;
-		constant FOPWB	: integer	:= 7;
+		constant FOP1	: integer	:= 6;
+		constant FOP2	: integer	:= 7;
+		constant FOP3	: integer	:= 8;
+		constant FOP4	: integer	:= 9;
+		constant FOP5	: integer	:= 10;
+		constant FOPWB	: integer	:= 11;
 		
 		constant EXC_VECTOR	: std_logic_vector(15 downto 0) := "0001000000000000";
 		constant debug 		: std_logic_vector(15 downto 0) := "1010101010101010";
@@ -107,11 +107,67 @@ architecture Structure of control_unit is
 	signal ctrl_pc	: std_logic_vector(1 downto 0) := "00";
 	signal ir		: std_logic_vector(15 downto 0);
 	
+	function check_bypass(	stage_c : integer;
+							stage_p : integer;
+							dest	: integer -- a=0, b=1, mem=2
+							) return std_ulogic is
+		
+		variable valid_op			: std_ulogic := '0';
+		variable reg_src_eq_dest	: std_ulogic := '0';
+		variable producer_produces	: std_ulogic := '0';
+		variable consumer_consumes	: std_ulogic := '0';
+	begin
+		valid_op := rstages(stage_c).opclass /= NOP and rstages(stage_p).opclass /= NOP;
+		
+		if (dest = 0) then
+			reg_src_eq_dest := rstages(stage_c).addr_a = rstages(stage_p).addr_d;
+		elsif (dest = 1) then
+			reg_src_eq_dest := rstages(stage_c).addr_b = rstages(stage_p).addr_d;
+		elsif (dest = 2) then
+			reg_src_eq_dest := rstages(stage_c).addr_a = rstages(stage_p).addr_d;
+		end if;
+		
+		if (dest = 0) then
+			consumer_consumes := 
+				rstages(stage_c).opclass = ART or 
+				rstages(stage_c).opclass = FOP or
+				(rstages(stage_c).opclass = MEM and 
+				 rstages(stage_c).opcode(1 downto 1) = '1');
+		elsif (dest = 1) then
+			consumer_consumes := 
+				rstages(stage_c).opclass = ART or 
+				rstages(stage_c).opclass = FOP or
+				rstages(stage_c).opclass = BNZ or
+				rstages(stage_c).opclass = MEM;
+		elsif (dest = 2) then
+			consumer_consumes := 
+				(rstages(stage_c).opclass = MEM and 
+				 rstages(stage_c).opcode(1 downto 1) = '1');
+		end if;
+		
+		producer_produces :=
+			rstages(stage_p).opclass = ART or 
+			rstages(stage_p).opclass = FOP or
+			(rstages(stage_p).opclass = MEM and 
+			 rstages(stage_c).opcode(1 downto 1) = '0');
+		
+		if (valid_op and reg_src_eq_dest and 
+			producer_produces and consumer_consumes) then
+			return('1');
+		else
+			return('0');
+		end if;
+		
+	end function check_bypass; 
+	
 begin
 	
 	-- Bypasses control
 	bypasses_ctrl_a(1 downto 0)	<= bypass_alu_ctrl_a;
 	bypasses_ctrl_b(1 downto 0)	<= bypass_alu_ctrl_b;
+	
+	bypasses_ctrl_a(3 downto 2)	<= bypass_fop_ctrl_a;
+	bypasses_ctrl_b(3 downto 2)	<= bypass_fop_ctrl_b;
 
 	bypasses_ctrl_mem(1 downto 0)	<= bypass_alu_ctrl_mem;
 	bypasses_ctrl_mem(3 downto 2)	<= bypass_lk_ctrl_mem;
@@ -123,18 +179,46 @@ begin
 	-- reg(dec) op uses a
 
 
---	bypass_alu_ctrl_a <=	
---				"11" when check_bypass(ALU, FOPWB, 0) else
---				"10" when check_bypass(ALU, MEMWB, 0) else
---				"01" when check_bypass(ALU, ALU, 0) else
---				"00"; -- no bypass
+	bypass_alu_ctrl_a <=	
+				"11" when check_bypass(ALU, FOPWB, 0) else
+				"10" when check_bypass(ALU, MEMWB, 0) else
+				"01" when check_bypass(ALU, LOOKUP, 0) else
+				"00"; -- no bypass
 
---	bypass_alu_ctrl_b <=	
---				"11" when check_bypass(ALU, FOPWB, 1) else
---				"10" when check_bypass(ALU, MEMWB, 1) else
---				"01" when check_bypass(ALU, ALU, 1) else
---				"00"; -- no bypass
+	bypass_alu_ctrl_b <=	
+				"11" when check_bypass(ALU, FOPWB, 1) else
+				"10" when check_bypass(ALU, MEMWB, 1) else
+				"01" when check_bypass(ALU, LOOKUP, 1) else
+				"00"; -- no bypass
 
+	bypass_fop_ctrl_a <=	
+				"11" when check_bypass(FOP1, FOPWB, 0) else
+				"10" when check_bypass(FOP1, MEMWB, 0) else
+				"01" when check_bypass(FOP1, LOOKUP, 0) else
+				"00"; -- no bypass
+
+	bypass_fop_ctrl_b <=	
+				"11" when check_bypass(FOP1, FOPWB, 1) else
+				"10" when check_bypass(FOP1, MEMWB, 1) else
+				"01" when check_bypass(FOP1, LOOKUP, 1) else
+				"00"; -- no bypass
+
+	bypass_alu_ctrl_mem <=	
+				"11" when check_bypass(ALU, FOPWB, 2) else
+				"10" when check_bypass(ALU, MEMWB, 2) else
+				"01" when check_bypass(ALU, LOOKUP, 2) else
+				"00"; -- no bypass
+
+	bypass_lk_ctrl_mem <=	
+				"11" when check_bypass(LOOKUP, FOPWB, 2) else
+				"10" when check_bypass(LOOKUP, MEMWB, 2) else
+				"00"; -- no bypass
+				
+
+	bypass_ch_ctrl_mem <=	
+				"11" when check_bypass(CACHE, FOPWB, 2) else
+				"10" when check_bypass(CACHE, MEMWB, 2) else
+				"00"; -- no bypass
 
 	ir <= decode_ir;
 
