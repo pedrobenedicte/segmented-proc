@@ -7,7 +7,7 @@ use std.textio.all;
 entity cache_d is
 	port (
 		clk				: in std_logic;		-- clock
-		boot				: in std_logic;		-- boot
+		boot			: in std_logic;		-- boot
 		r_w				: in std_logic;		-- read or write
 		cache_mem		: in std_logic;		-- access cache or memory
 		b_w				: in std_logic;		-- byte access or word access
@@ -19,14 +19,14 @@ entity cache_d is
 		memory_out		: out std_logic_vector(63 downto 0);
 		
 		data_in			: in std_logic_vector(15 downto 0);
-		data_out			: out std_logic_vector(15 downto 0)
+		data_out		: out std_logic_vector(15 downto 0)
 	);
 end entity;
 
 architecture Structure of cache_d is
-	signal page		: std_logical_vector(9 downto 0);
-	signal index	: std_logical_vector(2 downto 0);
-	signal offset	: std_logical_vector(2 downto 0);
+	signal page		: std_logic_vector(9 downto 0);
+	signal index	: std_logic_vector(2 downto 0);
+	signal offset	: std_logic_vector(2 downto 0);
 	
 	-- 8 lines, 64b each line
 	-- 512b cache size
