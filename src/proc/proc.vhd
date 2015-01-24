@@ -144,7 +144,7 @@ architecture Structure of proc is
 		);
 	end component;
 	
-	signal base_stall_vector	: std_logic_vector(11 downto 0);
+	signal stall_vector			: std_logic_vector(11 downto 0);
 	
 	-- Fetch
 	signal fetch_pc				: std_logic_vector(15 downto 0);
@@ -266,8 +266,7 @@ begin
 	port map (
 		clk					=> clk,
 		boot				=> boot,
-		base_stall_vector	=> base_stall_vector,
-		fop_stall_vector	=> fop_stall_vector,
+		stall_vector		=> stall_vector,
 		
 		-- Fetch
 		fetch_pc			=> fetch_pc,

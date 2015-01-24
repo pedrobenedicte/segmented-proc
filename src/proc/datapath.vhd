@@ -208,7 +208,7 @@ architecture Structure OF datapath is
 			
 			-- Data memory
 			dmem_we		: out	std_logic;
-			dmem_addr	: out	std_logic_vector(12 downto 0);
+			dmem_addr	: out	std_logic_vector(15 downto 0);
 			dmem_wr_data: out	std_logic_vector(63 downto 0);
 			dmem_rd_data: in	std_logic_vector(63 downto 0);
 			
@@ -443,8 +443,8 @@ begin
 	ch	: stage_cache
 	port map (
 		clk			=> clk,
+		boot		=> boot,
 		stall		=> stall_vector(CACHE),
-		nop			=> '0',
 		
 		-- flipflop inputs
 		ff_addr_mem	=> l2c_addr_mem,

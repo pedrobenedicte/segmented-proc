@@ -20,7 +20,7 @@ entity stage_cache is
 		
 		-- Data memory
 		dmem_we		: out	std_logic;
-		dmem_addr	: out	std_logic_vector(12 downto 0);
+		dmem_addr	: out	std_logic_vector(15 downto 0);
 		dmem_wr_data: out	std_logic_vector(63 downto 0);
 		dmem_rd_data: in	std_logic_vector(63 downto 0);
 		
@@ -72,7 +72,7 @@ begin
 		b_w					=> size_b_w,
 		add_physical		=> ff_addr_mem,
 		memory_r_w			=> nread,
-		memory_address		=> dmem_addr,
+		memory_address		=> dmem_addr(15 downto 3),
 		memory_in			=> dmem_rd_data,
 		memory_out			=> dmem_wr_data,
 		data_in				=> mem_data,
@@ -80,6 +80,7 @@ begin
 	);
 
 	dmem_we <= not nread;
+	dmem_addr(2 downto 0) <= "000";
 	
 	with bp_ctrl_mem select
 		mem_data	<=	mem_data_lk	when "00",
