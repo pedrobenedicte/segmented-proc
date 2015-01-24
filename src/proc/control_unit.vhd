@@ -15,6 +15,8 @@ entity control_unit is
 		fetch_exception		: in	std_logic;
 		-- Access cache or memory
 		fetch_cache_mem		: out	std_logic;
+		-- Hit or miss
+		fetch_hit_miss		: in	std_logic;
 		-- Physical addres obtained in previous miss
 		fetch_memory_pc		: out	std_logic_vector(15 downto 0);
 		

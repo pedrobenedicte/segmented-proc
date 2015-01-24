@@ -15,6 +15,8 @@ entity datapath is
 		fetch_exception		: out	std_logic;
 		-- Access cache or memory
 		fetch_cache_mem		: in	std_logic;
+		-- Hit or miss
+		fetch_hit_miss		: out	std_logic;
 		-- Physical addres obtained in previous miss
 		fetch_memory_pc		: in	std_logic_vector(15 downto 0);
 		
@@ -106,6 +108,9 @@ architecture Structure OF datapath is
 			
 			-- Access cache or memory
 			cache_mem		: in	std_logic;
+			
+			-- Hit or miss
+			hit_miss		: out	std_logic;
 			
 			-- Physical addres obtained in previous miss
 			memory_pc		: in	std_logic_vector(15 downto 0);
@@ -367,13 +372,16 @@ begin
 		
 		-- TLB exception
 		fetch_exception	=> fetch_exception,
-
+		
 		-- Access cache or memory
-		cache_mem		=> fetch_cache_mem,
-
+		cache_mem	=> fetch_cache_mem,
+		
+		-- Hit or miss
+		hit_miss	=> fetch_hit_miss,
+		
 		-- Physical addres obtained in previous miss
-		memory_pc		=> fetch_memory_pc,
-
+		memory_pc	=> fetch_memory_pc,
+		
 		-- no flipflop, pc comes from a flipflop
 		pc			=> fetch_pc,
 		ir			=> f2d_ir

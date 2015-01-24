@@ -108,8 +108,6 @@ begin
 	
 	fetch_exception <= not tlb_hit;
 	
-	ir 				<= addess_tlb;
-	
 	imem_addr(2 downto 0) <= "000";
 	
 	u_a_tlb <= to_integer(unsigned(addess_tlb));

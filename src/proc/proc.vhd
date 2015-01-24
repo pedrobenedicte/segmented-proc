@@ -35,6 +35,8 @@ architecture Structure of proc is
 			fetch_exception		: out	std_logic;
 			-- Access cache or memory
 			fetch_cache_mem		: in	std_logic;
+			-- Hit or miss
+			fetch_hit_miss		: out	std_logic;
 			-- Physical addres obtained in previous miss
 			fetch_memory_pc		: in	std_logic_vector(15 downto 0);
 			
@@ -107,6 +109,8 @@ architecture Structure of proc is
 			fetch_exception		: in	std_logic;
 			-- Access cache or memory
 			fetch_cache_mem		: out	std_logic;
+			-- Hit or miss
+			fetch_hit_miss		: in	std_logic;
 			-- Physical addres obtained in previous miss
 			fetch_memory_pc		: out	std_logic_vector(15 downto 0);
 			
@@ -164,6 +168,8 @@ architecture Structure of proc is
 	signal fetch_exception		: std_logic;
 	-- Access cache or memory
 	signal fetch_cache_mem		: std_logic;
+	-- Hit or miss
+	signal fetch_hit_miss		: std_logic;
 	-- Physical addres obtained in previous miss
 	signal fetch_memory_pc		: std_logic_vector(15 downto 0);
 			
@@ -227,6 +233,8 @@ begin
 		fetch_exception		=> fetch_exception,
 		-- Access cache or memory
 		fetch_cache_mem		=> fetch_cache_mem,
+		-- Hit or miss
+		fetch_hit_miss		=> fetch_hit_miss,
 		-- Physical addres obtained in previous miss
 		fetch_memory_pc		=> fetch_memory_pc,
 		
@@ -298,6 +306,8 @@ begin
 		fetch_exception		=> fetch_exception,
 		-- Access cache or memory
 		fetch_cache_mem		=> fetch_cache_mem,
+		-- Hit or miss
+		fetch_hit_miss		=> fetch_hit_miss,
 		-- Physical addres obtained in previous miss
 		fetch_memory_pc		=> fetch_memory_pc,
 		
