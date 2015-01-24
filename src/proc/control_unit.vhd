@@ -149,7 +149,7 @@ architecture Structure of control_unit is
 			rstages(stage_p).opclass = ART or 
 			rstages(stage_p).opclass = FOP or
 			(rstages(stage_p).opclass = MEM and 
-			 rstages(stage_c).opcode(1 downto 1) = '0');
+			 rstages(stage_p).opcode(1 downto 1) = '0');
 		
 		if (valid_op and reg_src_eq_dest and 
 			producer_produces and consumer_consumes) then
