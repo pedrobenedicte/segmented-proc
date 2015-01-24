@@ -96,7 +96,7 @@ begin
 	tlb : tlb_d
 		port map (
 			clk				=> clk,
-			boot			=> reset,
+			boot			=> boot,
 			we				=> lookup,
 			add_logical		=> ff_addr_mem,
 			hit_miss		=> tlb_hit,
