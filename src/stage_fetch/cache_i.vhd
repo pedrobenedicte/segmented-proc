@@ -42,7 +42,7 @@ architecture Structure of cache_i is
 		variable i		:integer := 0;
 		variable fdata	:std_logic_vector (63 downto 0);
 	begin
-		while not endfile(cache_file) loop
+		while i < 8 loop
 			-- read data from input file
 			readline(cache_file, lbuf);
 			read(lbuf, fdata);
@@ -76,7 +76,6 @@ begin
 				if (cache_mem = '1') then			-- load from cache
 					data_out(7 downto 0) <= cache(i_index)(i_offset);
 					data_out(15 downto 8) <= cache(i_index)(i_offset+1);
-					end if;
 				else										-- load from memory
 					memory_address	<= page & offset;
 					cache(i_index)(i_offset)	<= memory_in(63 downto 56);

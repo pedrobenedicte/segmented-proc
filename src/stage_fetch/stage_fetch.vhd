@@ -18,6 +18,9 @@ entity stage_fetch is
 		-- Access cache or memory
 		cache_mem		: in	std_logic;
 		
+		-- Hit or miss
+		--hit_miss		: out	std_logic;
+		
 		-- Physical addres obtained in previous miss
 		memory_pc		: in	std_logic_vector(15 downto 0);
 		
@@ -98,7 +101,7 @@ begin
 			boot			=> boot,
 			cache_mem		=> cache_mem,
 			add_physical	=> cache_add,
-			memory_address	=> imem_addr,
+			memory_address	=> imem_addr(15 downto 3),
 			memory_in		=> imem_rd_data,
 			data_out		=> ir
 		);
@@ -107,11 +110,13 @@ begin
 	
 	ir 				<= addess_tlb;
 	
+	imem_addr(2 downto 0) <= "000";
+	
 	u_a_tlb <= to_integer(unsigned(addess_tlb));
 	u_a_tag <= to_integer(unsigned(addess_tag));
 
-	hit_miss	<= '1' when ((tag_hit = '1') and (u_a_tlb = u_a_tag))
-				else '0';
+	--hit_miss	<= '1' when ((tag_hit = '1') and (u_a_tlb = u_a_tag))
+	--			else '0';
 	cache_add	<= pc when (cache_mem = '0')
 				else memory_pc;
 	

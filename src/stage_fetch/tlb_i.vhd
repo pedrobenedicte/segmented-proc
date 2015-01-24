@@ -34,7 +34,7 @@ architecture Structure of tlb_i is
 		variable i		:integer := 0;
 		variable fdata	:std_logic_vector (20 downto 0);
 	begin
-		while not endfile(tlb_file) loop
+		while i < 5 loop
 			-- read data from input file
 			readline(tlb_file, lbuf);
 			read(lbuf, fdata);
