@@ -28,9 +28,7 @@ architecture Structure of proc is
 			clk					: in	std_logic;
 			boot				: in	std_logic;
 			base_stall_vector	: in	std_logic_vector(5 downto 0);
-			base_nop_vector		: in	std_logic_vector(5 downto 1);
 			fop_stall_vector	: in	std_logic_vector(7 downto 2);
-			fop_nop_vector		: in	std_logic_vector(7 downto 2);
 			
 			-- Fetch
 			fetch_pc			: in	std_logic_vector(15 downto 0);
@@ -57,9 +55,7 @@ architecture Structure of proc is
 			alu_z				: out	std_logic;
 			
 			-- Cache
-			cache_opclass		: in	std_logic_vector(2 downto 0);
-			cache_opcode		: in	std_logic_vector(1 downto 0);
-		
+			
 			-- Memories
 			-- Instructions memory
 			imem_addr			: out	std_logic_vector(15 downto 0);
@@ -83,9 +79,7 @@ architecture Structure of proc is
 			clk					: in	std_logic;
 			boot				: in	std_logic;
 			base_stall_vector	: out	std_logic_vector(5 downto 0);
-			base_nop_vector		: out	std_logic_vector(5 downto 1);
 			fop_stall_vector	: out	std_logic_vector(7 downto 2);
-			fop_nop_vector		: out	std_logic_vector(7 downto 2);
 			
 			-- Fetch
 			fetch_pc			: out	std_logic_vector(15 downto 0);
@@ -112,8 +106,6 @@ architecture Structure of proc is
 			alu_z				: in	std_logic;
 			
 			-- Cache
-			cache_opclass		: out	std_logic_vector(2 downto 0);
-			cache_opcode		: out	std_logic_vector(1 downto 0);
 			
 			-- Bypasses control
 			bypasses_ctrl_a		: out	std_logic_vector(3 downto 0); -- A, F1
@@ -123,9 +115,7 @@ architecture Structure of proc is
 	end component;
 	
 	signal base_stall_vector	: std_logic_vector(5 downto 0);
-	signal base_nop_vector		: std_logic_vector(5 downto 1);
 	signal fop_stall_vector		: std_logic_vector(7 downto 2);
-	signal fop_nop_vector		: std_logic_vector(7 downto 2);
 	
 	
 	-- Fetch
@@ -153,8 +143,7 @@ architecture Structure of proc is
 	signal alu_z				: std_logic;
 	
 	-- Cache
-	signal cache_opclass		: std_logic_vector(2 downto 0);
-	signal cache_opcode			: std_logic_vector(1 downto 0);
+	
 
 	-- Bypasses control
 	signal bypasses_ctrl_a		: std_logic_vector(3 downto 0); -- A
@@ -170,9 +159,7 @@ begin
 		clk					=> clk,
 		boot				=> boot,
 		base_stall_vector	=> base_stall_vector,
-		base_nop_vector		=> base_nop_vector,
 		fop_stall_vector	=> fop_stall_vector,
-		fop_nop_vector		=> fop_nop_vector,
 		
 		-- Fetch
 		fetch_pc			=> fetch_pc,
@@ -199,8 +186,6 @@ begin
 		alu_z				=> alu_z,
 		
 		-- Cache
-		cache_opclass		=> cache_opclass,
-		cache_opcode		=> cache_opcode,
 		
 		-- Memories
 		-- Instructions memory
@@ -224,9 +209,7 @@ begin
 		clk					=> clk,
 		boot				=> boot,
 		base_stall_vector	=> base_stall_vector,
-		base_nop_vector		=> base_nop_vector,
 		fop_stall_vector	=> fop_stall_vector,
-		fop_nop_vector		=> fop_nop_vector,
 		
 		-- Fetch
 		fetch_pc			=> fetch_pc,
@@ -253,8 +236,6 @@ begin
 		alu_z				=> alu_z,
 		
 		-- Cache
-		cache_opclass		=> cache_opclass,
-		cache_opcode		=> cache_opcode,
 		
 		-- Bypasses control
 		bypasses_ctrl_a		=> bypasses_ctrl_a,

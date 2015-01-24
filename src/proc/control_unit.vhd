@@ -8,9 +8,7 @@ entity control_unit is
 		clk					: in	std_logic;
 		boot				: in	std_logic;
 		base_stall_vector	: out	std_logic_vector(5 downto 0);
-		base_nop_vector		: out	std_logic_vector(5 downto 1);
 		fop_stall_vector	: out	std_logic_vector(7 downto 2);
-		fop_nop_vector		: out	std_logic_vector(7 downto 2);
 		
 		-- Fetch
 		fetch_pc			: out	std_logic_vector(15 downto 0);
@@ -37,8 +35,6 @@ entity control_unit is
 		alu_z				: in	std_logic;
 		
 		-- Cache
-		cache_opclass		: out	std_logic_vector(2 downto 0);
-		cache_opcode		: out	std_logic_vector(1 downto 0);
 		
 		-- Bypasses control
 		bypasses_ctrl_a		: out	std_logic_vector(3 downto 0); -- A, F1

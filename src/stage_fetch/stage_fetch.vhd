@@ -6,6 +6,7 @@ use ieee.std_logic_unsigned.all;
 entity stage_fetch is
 	port (
 		clk				: in	std_logic;
+		boot			: in	std_logic;
 		stall			: in	std_logic;
 		
 		imem_addr		: out	std_logic_vector(15 downto 0);

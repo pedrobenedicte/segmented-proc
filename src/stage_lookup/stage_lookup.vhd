@@ -6,9 +6,8 @@ use ieee.std_logic_unsigned.all;
 entity stage_lookup is
 	port (
 		clk				: in	std_logic;
-		stall			: in	std_logic;
-		nop				: in	std_logic;
 		boot			: in 	std_logic;
+		stall			: in	std_logic;
 		
 		-- flipflop inputs
 		ff_addr_mem		: in	std_logic_vector(15 downto 0);
@@ -45,9 +44,7 @@ begin
 	process (clk)
 	begin
 		if (rising_edge(clk)) then
-			if stall = '1' then
-			elsif nop = '1' then
-			else
+			if not (stall = '1') then
 				aluwb			<= ff_addr_mem;
 				addr_mem_logical<= ff_addr_mem;
 				mem_data_inside	<= ff_mem_data;

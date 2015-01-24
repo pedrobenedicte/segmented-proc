@@ -7,7 +7,6 @@ entity stage_fwb is
 	port (
 		clk			: in	std_logic;
 		stall		: in	std_logic;
-		nop			: in	std_logic;
 		
 		-- flipflop inputs
 		ff_fop_data	: in	std_logic_vector(15 downto 0);
@@ -24,9 +23,7 @@ begin
 	process (clk)
 	begin
 		if (rising_edge(clk)) then
-			if stall = '1' then
-			elsif nop = '1' then
-			else
+			if not (stall = '1') then
 				fop_data 	<= ff_fop_data;
 			end if;
 		end if;

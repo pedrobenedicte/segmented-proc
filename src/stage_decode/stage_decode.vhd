@@ -7,7 +7,6 @@ entity stage_decode is
 	port (
 		clk			: in	std_logic;
 		stall		: in	std_logic;
-		nop			: in	std_logic;
 		
 		-- flipflop inputs
 		ff_ir		: in	std_logic_vector(15 downto 0);
@@ -96,9 +95,7 @@ begin
 	process (clk)
 	begin
 		if (rising_edge(clk)) then
-			if stall = '1' then
-			elsif nop = '1' then
-			else
+			if not (stall = '1') then
 				ir 	<= ff_ir;
 			end if;
 		end if;
