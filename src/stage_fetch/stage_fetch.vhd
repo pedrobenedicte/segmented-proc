@@ -19,7 +19,7 @@ entity stage_fetch is
 		cache_mem		: in	std_logic;
 		
 		-- Hit or miss
-		--hit_miss		: out	std_logic;
+		hit_miss		: out	std_logic;
 		
 		-- Physical addres obtained in previous miss
 		memory_pc		: in	std_logic_vector(15 downto 0);
@@ -115,8 +115,8 @@ begin
 	u_a_tlb <= to_integer(unsigned(addess_tlb));
 	u_a_tag <= to_integer(unsigned(addess_tag));
 
-	--hit_miss	<= '1' when ((tag_hit = '1') and (u_a_tlb = u_a_tag))
-	--			else '0';
+	hit_miss	<= '1' when ((tag_hit = '1') and (u_a_tlb = u_a_tag))
+				else '0';
 	cache_add	<= pc when (cache_mem = '0')
 				else memory_pc;
 	
