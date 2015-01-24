@@ -9,12 +9,9 @@ entity tags_i is
 		clk				: in std_logic;
 		boot			: in std_logic;
 		we				: in std_logic;
-		read_write		: in std_logic;
 		add_logical		: in std_logic_vector(15 downto 0);
 		add_physical	: in std_logic_vector(15 downto 0);
-		hit_miss		: out std_logic;
-		wb				: out std_logic;
-		wb_tag			: out std_logic_vector(9 downto 0)
+		hit_miss		: out std_logic
 	);
 end entity;
 
@@ -82,10 +79,9 @@ begin
 							wb_tag <= tags(conv_integer(index))(9 downto 0);
 						end if;
 						tags(conv_integer(index))(11) <= '1';
-						tags(conv_integer(index))(10) <= not read_write;
 						tags(conv_integer(index))(9 downto 0) <= add_physical(15 downto 6);
 					else
-						tags(conv_integer(index))(10) <= (not read_write) or (tags(conv_integer(index))(10));
+						tags(conv_integer(index))(10) <= (tags(conv_integer(index))(10);
 					end if;
 				end if;
 			end if;

@@ -10,7 +10,6 @@ entity cache_i is
 		clk				: in std_logic;		-- clock
 		boot			: in std_logic;		-- boot
 		cache_mem		: in std_logic;		-- access cache or memory
-		b_w				: in std_logic;		-- byte access or word access
 		add_physical	: in std_logic_vector(15 downto 0);
 		
 		memory_address	: out std_logic_vector(12 downto 0);
@@ -76,8 +75,7 @@ begin
 			else
 				if (cache_mem = '1') then			-- load from cache
 					data_out(7 downto 0) <= cache(i_index)(i_offset);
-					if (b_w = '0') then
-						data_out(15 downto 8) <= cache(i_index)(i_offset+1);
+					data_out(15 downto 8) <= cache(i_index)(i_offset+1);
 					end if;
 				else										-- load from memory
 					memory_address	<= page & offset;

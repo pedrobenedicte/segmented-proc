@@ -110,7 +110,8 @@ begin
 						debug			when others;
 
 	hit_miss <= '1' when ((tag_hit = '1') and (u_a_tlb = u_a_tag))
-				else '0';		
+				else '0';
+	addr_mem <= addess_tlb;
 	
 	process (clk)
 	begin
