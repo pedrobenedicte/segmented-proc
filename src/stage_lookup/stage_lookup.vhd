@@ -5,14 +5,9 @@ use ieee.std_logic_unsigned.all;
 
 entity stage_lookup is
 	port (
-<<<<<<< HEAD
 		clk				: in	std_logic;
-		reset				: in 	std_logic;
-=======
-		clock				: in	std_logic;
-		boot				: in 	std_logic;
->>>>>>> ac33ff1486b9bf0f0a739a8f97c7ee44310e516c
-		stall				: in	std_logic;
+		boot			: in	std_logic;
+		stall			: in	std_logic;
 		
 		-- flipflop inputs
 		ff_addr_mem			: in	std_logic_vector(15 downto 0);
@@ -81,20 +76,14 @@ architecture Structure of stage_lookup is
 	signal u_a_tag			: integer;
 begin
 	lookup_exception <= not tlb_hit;
-<<<<<<< HEAD
+
 	u_a_tlb <= to_integer(unsigned(addess_tlb));
 	u_a_tag <= to_integer(unsigned(addess_tag));
 	
 	tags : tags_d 
 		port map (
 			clk				=> clk,
-			boot			=> reset,
-=======
-
-	tags : tags_d (
-			clk				=> clock,
 			boot			=> boot,
->>>>>>> ac33ff1486b9bf0f0a739a8f97c7ee44310e516c
 			we				=> lookup,
 			read_write		=> load_store,
 			add_logical		=> ff_addr_mem,
