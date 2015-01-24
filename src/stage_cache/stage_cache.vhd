@@ -63,7 +63,8 @@ architecture Structure of stage_cache is
 	signal nread		: std_logic;
 	
 begin
-	cache : cache_d(
+	cache : cache_d
+	port map (
 		clk					=> clk,
 		boot				=> boot,
 		r_w					=> mode_r_w,
