@@ -161,66 +161,6 @@ architecture Structure of control_unit is
 	end function check_bypass; 
 	
 begin
-	
-	-- Bypasses control
-	bypasses_ctrl_a(1 downto 0)	<= bypass_alu_ctrl_a;
-	bypasses_ctrl_b(1 downto 0)	<= bypass_alu_ctrl_b;
-	
-	bypasses_ctrl_a(3 downto 2)	<= bypass_fop_ctrl_a;
-	bypasses_ctrl_b(3 downto 2)	<= bypass_fop_ctrl_b;
-
-	bypasses_ctrl_mem(1 downto 0)	<= bypass_alu_ctrl_mem;
-	bypasses_ctrl_mem(3 downto 2)	<= bypass_lk_ctrl_mem;
-	bypasses_ctrl_mem(5 downto 4)	<= bypass_ch_ctrl_mem;
-
-	-- check_bypass
-	-- reg(dec).ra = regf(fopwb).rdest
-	-- regf(fopbw) <> STORE
-	-- reg(dec) op uses a
-
-
-	bypass_alu_ctrl_a <=	
-				"11" when check_bypass(ALU, FOPWB, 0) else
-				"10" when check_bypass(ALU, MEMWB, 0) else
-				"01" when check_bypass(ALU, LOOKUP, 0) else
-				"00"; -- no bypass
-
-	bypass_alu_ctrl_b <=	
-				"11" when check_bypass(ALU, FOPWB, 1) else
-				"10" when check_bypass(ALU, MEMWB, 1) else
-				"01" when check_bypass(ALU, LOOKUP, 1) else
-				"00"; -- no bypass
-
-	bypass_fop_ctrl_a <=	
-				"11" when check_bypass(FOP1, FOPWB, 0) else
-				"10" when check_bypass(FOP1, MEMWB, 0) else
-				"01" when check_bypass(FOP1, LOOKUP, 0) else
-				"00"; -- no bypass
-
-	bypass_fop_ctrl_b <=	
-				"11" when check_bypass(FOP1, FOPWB, 1) else
-				"10" when check_bypass(FOP1, MEMWB, 1) else
-				"01" when check_bypass(FOP1, LOOKUP, 1) else
-				"00"; -- no bypass
-
-	bypass_alu_ctrl_mem <=	
-				"11" when check_bypass(ALU, FOPWB, 2) else
-				"10" when check_bypass(ALU, MEMWB, 2) else
-				"01" when check_bypass(ALU, LOOKUP, 2) else
-				"00"; -- no bypass
-
-	bypass_lk_ctrl_mem <=	
-				"11" when check_bypass(LOOKUP, FOPWB, 2) else
-				"10" when check_bypass(LOOKUP, MEMWB, 2) else
-				"00"; -- no bypass
-				
-
-	bypass_ch_ctrl_mem <=	
-				"11" when check_bypass(CACHE, FOPWB, 2) else
-				"10" when check_bypass(CACHE, MEMWB, 2) else
-				"00"; -- no bypass
-
-	ir <= decode_ir;
 
 	-- Instruction decode
 		opclass	<= ir(15 downto 13);
@@ -235,16 +175,72 @@ begin
 			immed	<=	SXT(ir(10 DOWNTO 6),immed'length) when MEM,
 						SXT(ir(10 DOWNTO 3),immed'length) when BNZ,
 						debug	when others;
+
 	
-	--with ctrl_pc select
-	--	newPC	<=	base_rstages(FETCH).pc+4		when "00",
-	--				base_rstages(FETCH).pc+jump	when "01",
-	--				EXC_VECTOR				when "10",
-	--				base_rstages(FETCH).pc+4		when others;
+	-- Bypasses control 
+		bypasses_ctrl_a(1 downto 0)		<= bypass_alu_ctrl_a;
+		bypasses_ctrl_b(1 downto 0)		<= bypass_alu_ctrl_b;
+		
+		bypasses_ctrl_a(3 downto 2)		<= bypass_fop_ctrl_a;
+		bypasses_ctrl_b(3 downto 2)		<= bypass_fop_ctrl_b;
+
+		bypasses_ctrl_mem(1 downto 0)	<= bypass_alu_ctrl_mem;
+		bypasses_ctrl_mem(3 downto 2)	<= bypass_lk_ctrl_mem;
+		bypasses_ctrl_mem(5 downto 4)	<= bypass_ch_ctrl_mem;
+
+		bypass_alu_ctrl_a <=	
+					"11" when check_bypass(ALU, FOPWB, 0) else
+					"10" when check_bypass(ALU, MEMWB, 0) else
+					"01" when check_bypass(ALU, LOOKUP, 0) else
+					"00"; -- no bypass
+
+		bypass_alu_ctrl_b <=	
+					"11" when check_bypass(ALU, FOPWB, 1) else
+					"10" when check_bypass(ALU, MEMWB, 1) else
+					"01" when check_bypass(ALU, LOOKUP, 1) else
+					"00"; -- no bypass
+
+		bypass_fop_ctrl_a <=	
+					"11" when check_bypass(FOP1, FOPWB, 0) else
+					"10" when check_bypass(FOP1, MEMWB, 0) else
+					"01" when check_bypass(FOP1, LOOKUP, 0) else
+					"00"; -- no bypass
+
+		bypass_fop_ctrl_b <=	
+					"11" when check_bypass(FOP1, FOPWB, 1) else
+					"10" when check_bypass(FOP1, MEMWB, 1) else
+					"01" when check_bypass(FOP1, LOOKUP, 1) else
+					"00"; -- no bypass
+
+		bypass_alu_ctrl_mem <=	
+					"11" when check_bypass(ALU, FOPWB, 2) else
+					"10" when check_bypass(ALU, MEMWB, 2) else
+					"01" when check_bypass(ALU, LOOKUP, 2) else
+					"00"; -- no bypass
+
+		bypass_lk_ctrl_mem <=	
+					"11" when check_bypass(LOOKUP, FOPWB, 2) else
+					"10" when check_bypass(LOOKUP, MEMWB, 2) else
+					"00"; -- no bypass
+					
+
+		bypass_ch_ctrl_mem <=	
+					"11" when check_bypass(CACHE, FOPWB, 2) else
+					"10" when check_bypass(CACHE, MEMWB, 2) else
+					"00"; -- no bypass
+
+
+	
+	ir <= decode_ir;
+
+
+	with ctrl_pc select
+		newPC	<=	EXC_VECTOR									when "10",
+					rstages(FETCH).pc+alu_w(15 downto 2)&"00"	when "01",
+					rstages(FETCH).pc+4							when others;
 
 	-- Fetch signals assignation
 	fetch_pc	<=	base_rstages(FETCH).pc;
-	
 	
 	process(clk)
 	begin
@@ -256,7 +252,7 @@ begin
 				-- if exception/interruption
 				-- elsif branch
 				-- else +4
-				base_rstages(FETCH).pc	<= newPC;
+				rstages(FETCH).pc	<= newPC;
 			end if;
 		end if;
 	end process;

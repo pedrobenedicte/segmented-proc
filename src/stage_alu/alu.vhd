@@ -45,7 +45,7 @@ begin
 		w <=	zero		when NOP,
 				wMem		when MEM,
 				wLogAritm	when ART,
-				zero		when BNZ,
+				x			when BNZ,
 				zero		when FOP,
 				debug		when others;
 	
