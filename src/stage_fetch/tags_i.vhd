@@ -4,7 +4,7 @@ use ieee.std_logic_unsigned.all;
 use ieee.std_logic_textio.all;
 use std.textio.all;
 
-entity tags_d is
+entity tags_i is
 	port (
 		clk				: in std_logic;
 		boot			: in std_logic;
@@ -18,7 +18,7 @@ entity tags_d is
 	);
 end entity;
 
-architecture Structure of tags_d is
+architecture Structure of tags_i is
 	signal index		: std_logic_vector(2 downto 0);
 	signal stored_tag	: std_logic_vector(9 downto 0);
 	signal valid		: std_logic;
@@ -35,9 +35,9 @@ architecture Structure of tags_d is
 	signal tags : tags_table;
 	
 	-- Initialize Tags from file tags_d.txt
-	procedure Load_Tags_Data (signal data : inout tags_table) is
+	procedure Load_Tags_Inst (signal data : inout tags_table) is
 		-- Open File in Read Mode
-		file tag_file	:text open read_mode is "tags_d.txt";
+		file tag_file	:text open read_mode is "tags_i.txt";
 		variable lbuf	:line;
 		variable i		:integer := 0;
 		variable fdata	:std_logic_vector (11 downto 0);
@@ -62,7 +62,7 @@ begin
 		if (clk'event) then
 			if (clk = '0') then
 				if (boot = '1') then
-					Load_Tags_Data(tags);
+					Load_Tags_Inst(tags);
 				else
 					if (we = '1') then
 						valid <= tags(conv_integer(index))(11);

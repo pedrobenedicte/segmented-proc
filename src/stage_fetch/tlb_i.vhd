@@ -4,7 +4,7 @@ use ieee.std_logic_unsigned.all;
 use ieee.std_logic_textio.all;
 use std.textio.all;
 
-entity tlb_d is
+entity tlb_i is
 	port (
 		clk				: in std_logic;
 		boot			: in std_logic;
@@ -15,7 +15,7 @@ entity tlb_d is
 	);
 end entity;
 
-architecture Structure of tlb_d is
+architecture Structure of tlb_i is
 	signal page_logical		: std_logic_vector(9 downto 0);
 	signal page_physical	: std_logic_vector(9 downto 0);
 	signal hit				: std_logic_vector(4 downto 0);
@@ -27,9 +27,9 @@ architecture Structure of tlb_d is
 	signal tlb : tlb_table;
 
 	-- Initialize TLB from file tlb_d.txt
-	procedure Load_TLB_Data (signal data : inout tlb_table) is
+	procedure Load_TLB_Inst (signal data : inout tlb_table) is
 		-- Open File in Read Mode
-		file tlb_file	:text open read_mode is "tlb_d.txt";
+		file tlb_file	:text open read_mode is "tlb_i.txt";
 		variable lbuf	:line;
 		variable i		:integer := 0;
 		variable fdata	:std_logic_vector (20 downto 0);
@@ -64,7 +64,7 @@ begin
 	begin
 		if (clk'event and clk = '0') then
 			if (boot = '1') then
-				Load_TLB_Data(tlb);
+				Load_TLB_Inst(tlb);
 			else
 				if (we = '1') then
 					Check_TLB_Entry(tlb(0)(20), page_logical, tlb(0), hit(0));

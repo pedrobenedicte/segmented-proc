@@ -42,7 +42,7 @@ architecture Structure of tags_d is
 		variable i		:integer := 0;
 		variable fdata	:std_logic_vector (11 downto 0);
 	begin
-		while not endfile(tag_file) loop
+		while (i < 8) loop
 			-- read data from input file
 			readline(tag_file, lbuf);
 			read(lbuf, fdata);
@@ -59,34 +59,32 @@ begin
 	
 	process (clk)
 	begin
-		if (clk'event) then
-			if (clk = '0') then
-				if (boot = '1') then
-					Load_Tags_Data(tags);
-				else
-					if (we = '1') then
-						valid <= tags(conv_integer(index))(11);
-						dirty <= tags(conv_integer(index))(10);
-						stored_tag <= tags(conv_integer(index))(9 downto 0);
-						if ((stored_tag = add_physical(15 downto 6)) and (valid = '1')) then
-							hit <= '1';
-						else
-							hit <= '0';
-						end if;
-					end if;
-				end if;
+		if (clk'event and clk = '0') then
+			if (boot = '1') then
+				Load_Tags_Data(tags);
 			else
 				if (we = '1') then
-					if (hit = '0') then
-						if (dirty = '1') then
-							wb_tag <= tags(conv_integer(index))(9 downto 0);
-						end if;
-						tags(conv_integer(index))(11) <= '1';
-						tags(conv_integer(index))(10) <= not read_write;
-						tags(conv_integer(index))(9 downto 0) <= add_physical(15 downto 6);
+					valid <= tags(conv_integer(index))(11);
+					dirty <= tags(conv_integer(index))(10);
+					stored_tag <= tags(conv_integer(index))(9 downto 0);
+					if ((stored_tag = add_physical(15 downto 6)) and (valid = '1')) then
+						hit <= '1';
 					else
-						tags(conv_integer(index))(10) <= (not read_write) or (tags(conv_integer(index))(10));
+						hit <= '0';
 					end if;
+				end if;
+			end if;
+		elsif (clk'event and clk = '1') then
+			if (we = '1') then
+				if (hit = '0') then
+					if (dirty = '1') then
+						wb_tag <= tags(conv_integer(index))(9 downto 0);
+					end if;
+					tags(conv_integer(index))(11) <= '1';
+					tags(conv_integer(index))(10) <= not read_write;
+					tags(conv_integer(index))(9 downto 0) <= add_physical(15 downto 6);
+				else
+					tags(conv_integer(index))(10) <= (not read_write) or (tags(conv_integer(index))(10));
 				end if;
 			end if;
 		end if;
