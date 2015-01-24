@@ -57,6 +57,7 @@ end control_unit;
 
 
 architecture Structure of control_unit is
+
 	type reg_stages_entry is record
 		int		: std_logic;
 		exc		: std_logic;
@@ -75,6 +76,16 @@ architecture Structure of control_unit is
 	signal fop_rstages	: fop_reg_stages;
 	
 	signal newPC	: std_logic_vector(15 downto 0);
+
+	signal bypass_dec_ctrl_a	: std_logic_vector(1 downto 0);
+	signal bypass_alu_ctrl_a	: std_logic_vector(1 downto 0);
+	signal bypass_dec_ctrl_b	: std_logic_vector(1 downto 0);
+	signal bypass_alu_ctrl_b	: std_logic_vector(1 downto 0);
+
+	signal bypass_dec_ctrl_mem	: std_logic_vector(1 downto 0);
+	signal bypass_alu_ctrl_mem	: std_logic_vector(1 downto 0);
+	signal bypass_lk_ctrl_mem	: std_logic_vector(1 downto 0);
+	signal bypass_ch_ctrl_mem	: std_logic_vector(1 downto 0);
 	
 	-- Defines
 		constant FETCH	: integer	:= 0;
@@ -91,7 +102,8 @@ architecture Structure of control_unit is
 		constant FOP5	: integer	:= 6;
 		constant FOPWB	: integer	:= 7;
 		
-		constant EXCVECTOR	: std_logic_vector(15 downto 0) := "0001000000000000";
+		constant EXC_VECTOR	: std_logic_vector(15 downto 0) := "0001000000000000";
+		constant debug 		: std_logic_vector(15 downto 0) := "1010101010101010";
 	
 	-- Instruction decode signlas
 		constant NOP	: std_logic_vector(2 downto 0) := "000";
@@ -111,6 +123,45 @@ architecture Structure of control_unit is
 	signal ir		: std_logic_vector(15 downto 0);
 	
 begin
+	
+	-- Bypasses control
+	bypasses_ctrl_a(1 downto 0)	<= bypass_dec_ctrl_a;
+	bypasses_ctrl_a(3 downto 2)	<= bypass_alu_ctrl_a;
+	bypasses_ctrl_b(1 downto 0)	<= bypass_dec_ctrl_b;
+	bypasses_ctrl_b(3 downto 2)	<= bypass_alu_ctrl_b;
+
+	bypass_ctrl_mem(1 downto 0)	<= bypass_dec_ctrl_mem;
+	bypass_ctrl_mem(3 downto 2)	<= bypass_alu_ctrl_mem;
+	bypass_ctrl_mem(5 downto 4)	<= bypass_lk_ctrl_mem;
+	bypass_ctrl_mem(7 downto 6)	<= bypass_ch_ctrl_mem;
+
+	-- check_bypass
+	-- reg(dec).ra = regf(fopwb).rdest
+	-- regf(fopbw) <> STORE
+	-- reg(dec) op uses a
+
+
+	bypass_dec_ctrl_a <=	"11" when check_bypass(DECODE, FOPWB, 0) else
+				"10" when check_bypass(DECODE, MEMWB, 0) else
+				"01" when check_bypass(DECODE, ALU, 0) else
+				"00";
+
+	bypass_alu_ctrl_a <=	"11" when check_bypass(ALU, FOPWB, 0) else
+				"10" when check_bypass(ALU, MEMWB, 0) else
+				"01" when check_bypass(ALU, ALU, 0) else
+				"00";
+
+	bypass_dec_ctrl_b <=	"11" when check_bypass(DECODE, FOPWB, 1) else
+				"10" when check_bypass(DECODE, MEMWB, 1) else
+				"01" when check_bypass(DECODE, ALU, 1) else
+				"00";
+
+	bypass_alu_ctrl_b <=	"11" when check_bypass(ALU, FOPWB, 1) else
+				"10" when check_bypass(ALU, MEMWB, 1) else
+				"01" when check_bypass(ALU, ALU, 1) else
+				"00";
+
+
 	ir <= decode_ir;
 
 	-- Instruction decode
@@ -124,17 +175,17 @@ begin
 		
 		with ir(15 downto 13) select
 			immed	<=	SXT(ir(10 DOWNTO 6),immed'length) when MEM,
-						SXT(ir(10 DOWNTO 3),immed'length) when BNZ;
+						SXT(ir(10 DOWNTO 3),immed'length) when BNZ,
+						debug	when others;
 	
-	
-	with ctrl_pc select
-		newPC	<=	base_rstages(FETCH).pc+4		when "00",
-					base_rstages(FETCH).pc+jump	when "01",
-					EXCVECTOR				when "10",
-					base_rstages(FETCH).pc+4		when others;
+	--with ctrl_pc select
+	--	newPC	<=	base_rstages(FETCH).pc+4		when "00",
+	--				base_rstages(FETCH).pc+jump	when "01",
+	--				EXC_VECTOR				when "10",
+	--				base_rstages(FETCH).pc+4		when others;
 
 	-- Fetch signals assignation
-	fetch_pc	<=	rstages(FETCH).pc;
+	fetch_pc	<=	base_rstages(FETCH).pc;
 	
 	
 	process(clk)

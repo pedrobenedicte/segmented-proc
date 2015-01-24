@@ -349,7 +349,7 @@ begin
 		addr_a		=> decode_addr_a,
 		addr_b		=> decode_addr_b,
 		a			=> d2a_a, 
-		b			=> d2a_a,
+		b			=> d2a_b,
 		
 		wrd			=> decode_wrd,
 		ctrl_d		=> decode_ctrl_d,

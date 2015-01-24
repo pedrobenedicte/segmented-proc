@@ -3,8 +3,20 @@ USE ieee.std_logic_1164.all;
 
 entity proc is
 	port (
-		clk          : in std_logic;
-		boot         : in std_logic
+		clk				: in std_logic;
+		boot			: in std_logic;
+		
+		-- Instructions memory
+		imem_we			: out	std_logic;
+		imem_addr		: out	std_logic_vector(15 downto 0);
+		imem_wr_data	: out	std_logic_vector(63 downto 0);
+		imem_rd_data	: in	std_logic_vector(63 downto 0);
+		
+		-- Data memory
+		dmem_we			: out	std_logic;
+		dmem_addr		: out	std_logic_vector(15 downto 0);
+		dmem_wr_data	: out	std_logic_vector(63 downto 0);
+		dmem_rd_data	: in	std_logic_vector(63 downto 0)
 	);
 end proc;
 
@@ -115,7 +127,6 @@ architecture Structure of proc is
 		);
 	end component;
 	
-	signal boot					: std_logic;
 	signal base_stall_vector	: std_logic_vector(5 downto 0);
 	signal base_nop_vector		: std_logic_vector(5 downto 1);
 	signal fop_stall_vector		: std_logic_vector(7 downto 2);
