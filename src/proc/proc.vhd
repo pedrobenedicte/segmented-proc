@@ -31,6 +31,12 @@ architecture Structure of proc is
 			
 			-- Fetch
 			fetch_pc			: in	std_logic_vector(15 downto 0);
+			-- TLB exception
+			fetch_exception		: out	std_logic;
+			-- Access cache or memory
+			fetch_cache_mem		: in	std_logic;
+			-- Physical addres obtained in previous miss
+			fetch_memory_pc		: in	std_logic_vector(15 downto 0);
 			
 			-- Decode
 			decode_awb_addr_d	: in	std_logic_vector(2 downto 0);
@@ -97,6 +103,12 @@ architecture Structure of proc is
 			
 			-- Fetch
 			fetch_pc			: out	std_logic_vector(15 downto 0);
+			-- TLB exception
+			fetch_exception		: in	std_logic;
+			-- Access cache or memory
+			fetch_cache_mem		: out	std_logic;
+			-- Physical addres obtained in previous miss
+			fetch_memory_pc		: out	std_logic_vector(15 downto 0);
 			
 			-- Decode
 			decode_awb_addr_d	: out	std_logic_vector(2 downto 0);
@@ -148,7 +160,13 @@ architecture Structure of proc is
 	
 	-- Fetch
 	signal fetch_pc				: std_logic_vector(15 downto 0);
-	
+	-- TLB exception
+	signal fetch_exception		: std_logic;
+	-- Access cache or memory
+	signal fetch_cache_mem		: std_logic;
+	-- Physical addres obtained in previous miss
+	signal fetch_memory_pc		: std_logic_vector(15 downto 0);
+			
 	-- Decode	
 	signal decode_awb_addr_d	: std_logic_vector(2 downto 0);
 	signal decode_mwb_addr_d	: std_logic_vector(2 downto 0);
@@ -205,6 +223,12 @@ begin
 		
 		-- Fetch
 		fetch_pc			=> fetch_pc,
+		-- TLB exception
+		fetch_exception		=> fetch_exception,
+		-- Access cache or memory
+		fetch_cache_mem		=> fetch_cache_mem,
+		-- Physical addres obtained in previous miss
+		fetch_memory_pc		=> fetch_memory_pc,
 		
 		-- Decode
 		decode_awb_addr_d	=> decode_awb_addr_d,
@@ -270,6 +294,12 @@ begin
 		
 		-- Fetch
 		fetch_pc			=> fetch_pc,
+		-- TLB exception
+		fetch_exception		=> fetch_exception,
+		-- Access cache or memory
+		fetch_cache_mem		=> fetch_cache_mem,
+		-- Physical addres obtained in previous miss
+		fetch_memory_pc		=> fetch_memory_pc,
 		
 		-- Decode		
 		decode_awb_addr_d	=> decode_awb_addr_d,

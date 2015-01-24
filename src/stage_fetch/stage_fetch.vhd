@@ -19,7 +19,7 @@ entity stage_fetch is
 		cache_mem		: in	std_logic;
 		
 		-- Physical addres obtained in previous miss
-		pc_address		: in	std_logic_vector(15 downto 0);
+		memory_pc		: in	std_logic_vector(15 downto 0);
 		
 		-- no flipflop, pc comes from a flipflop
 		pc				: in	std_logic_vector(15 downto 0);
@@ -113,6 +113,6 @@ begin
 	hit_miss	<= '1' when ((tag_hit = '1') and (u_a_tlb = u_a_tag))
 				else '0';
 	cache_add	<= pc when (cache_mem = '0')
-				else pc_address;
+				else memory_pc;
 	
 end Structure;

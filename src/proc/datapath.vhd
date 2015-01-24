@@ -11,6 +11,12 @@ entity datapath is
 		
 		-- Fetch
 		fetch_pc			: in	std_logic_vector(15 downto 0);
+		-- TLB exception
+		fetch_exception		: out	std_logic;
+		-- Access cache or memory
+		fetch_cache_mem		: in	std_logic;
+		-- Physical addres obtained in previous miss
+		fetch_memory_pc		: in	std_logic_vector(15 downto 0);
 		
 		-- Decode
 		decode_awb_addr_d	: in	std_logic_vector(2 downto 0);
@@ -95,6 +101,16 @@ architecture Structure OF datapath is
 			imem_addr		: out	std_logic_vector(15 downto 0);
 			imem_rd_data	: in	std_logic_vector(63 downto 0);
 			
+			-- TLB exception
+			fetch_exception	: out	std_logic;
+			
+			-- Access cache or memory
+			cache_mem		: in	std_logic;
+			
+			-- Physical addres obtained in previous miss
+			memory_pc		: in	std_logic_vector(15 downto 0);
+			
+			-- no flipflop, pc comes from a flipflop
 			pc				: in	std_logic_vector(15 downto 0);
 			ir				: out	std_logic_vector(15 downto 0)
 		);
@@ -345,8 +361,20 @@ begin
 		clk			=> clk,
 		boot		=> boot,
 		stall		=> stall_vector(FETCH),
+		
 		imem_addr	=> imem_addr,
 		imem_rd_data=> imem_rd_data,
+		
+		-- TLB exception
+		fetch_exception	=> fetch_exception,
+
+		-- Access cache or memory
+		cache_mem		=> fetch_cache_mem,
+
+		-- Physical addres obtained in previous miss
+		memory_pc		=> fetch_memory_pc,
+
+		-- no flipflop, pc comes from a flipflop
 		pc			=> fetch_pc,
 		ir			=> f2d_ir
 	);

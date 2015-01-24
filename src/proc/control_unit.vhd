@@ -11,6 +11,12 @@ entity control_unit is
 		
 		-- Fetch
 		fetch_pc			: out	std_logic_vector(15 downto 0);
+		-- TLB exception
+		fetch_exception		: in	std_logic;
+		-- Access cache or memory
+		fetch_cache_mem		: out	std_logic;
+		-- Physical addres obtained in previous miss
+		fetch_memory_pc		: out	std_logic_vector(15 downto 0);
 		
 		-- Decode
 		decode_awb_addr_d	: out	std_logic_vector(2 downto 0);
