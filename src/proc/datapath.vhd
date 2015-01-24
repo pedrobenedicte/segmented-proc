@@ -160,7 +160,7 @@ architecture Structure OF datapath is
 	
 	component stage_lookup is
 		port (
-			clock				: in	std_logic;
+			clk				: in	std_logic;
 			boot				: in 	std_logic;
 			stall				: in	std_logic;
 			
