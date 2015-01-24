@@ -27,8 +27,7 @@ architecture Structure of proc is
 		port (
 			clk					: in	std_logic;
 			boot				: in	std_logic;
-			base_stall_vector	: in	std_logic_vector(5 downto 0);
-			fop_stall_vector	: in	std_logic_vector(7 downto 2);
+			stall_vector		: in	std_logic_vector(11 downto 0);
 			
 			-- Fetch
 			fetch_pc			: in	std_logic_vector(15 downto 0);
@@ -78,8 +77,7 @@ architecture Structure of proc is
 		port (
 			clk					: in	std_logic;
 			boot				: in	std_logic;
-			base_stall_vector	: out	std_logic_vector(5 downto 0);
-			fop_stall_vector	: out	std_logic_vector(7 downto 2);
+			stall_vector		: out	std_logic_vector(11 downto 0);
 			
 			-- Fetch
 			fetch_pc			: out	std_logic_vector(15 downto 0);
@@ -114,9 +112,7 @@ architecture Structure of proc is
 		);
 	end component;
 	
-	signal base_stall_vector	: std_logic_vector(5 downto 0);
-	signal fop_stall_vector		: std_logic_vector(7 downto 2);
-	
+	signal base_stall_vector	: std_logic_vector(11 downto 0);
 	
 	-- Fetch
 	signal fetch_pc				: std_logic_vector(15 downto 0);
@@ -158,8 +154,7 @@ begin
 	port map (
 		clk					=> clk,
 		boot				=> boot,
-		base_stall_vector	=> base_stall_vector,
-		fop_stall_vector	=> fop_stall_vector,
+		stall_vector		=> stall_vector,
 		
 		-- Fetch
 		fetch_pc			=> fetch_pc,
