@@ -22,6 +22,7 @@ entity stage_fetch is
 		hit_miss		: out	std_logic;
 		
 		-- Physical addres obtained in previous miss
+		real_address	: out	std_logic_vector(15 downto 0);
 		memory_pc		: in	std_logic_vector(15 downto 0);
 		
 		-- no flipflop, pc comes from a flipflop
@@ -107,6 +108,8 @@ begin
 		);
 	
 	fetch_exception <= not tlb_hit;
+	
+	real_address <= addess_tlb;
 	
 	imem_addr(2 downto 0) <= "000";
 	

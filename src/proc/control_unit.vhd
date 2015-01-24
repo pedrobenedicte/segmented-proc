@@ -18,6 +18,7 @@ entity control_unit is
 		-- Hit or miss
 		fetch_hit_miss		: in	std_logic;
 		-- Physical addres obtained in previous miss
+		fetch_real_address	: in	std_logic_vector(15 downto 0);
 		fetch_memory_pc		: out	std_logic_vector(15 downto 0);
 		
 		-- Decode

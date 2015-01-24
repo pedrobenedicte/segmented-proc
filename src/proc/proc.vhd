@@ -38,6 +38,7 @@ architecture Structure of proc is
 			-- Hit or miss
 			fetch_hit_miss		: out	std_logic;
 			-- Physical addres obtained in previous miss
+			fetch_real_address	: out	std_logic_vector(15 downto 0);
 			fetch_memory_pc		: in	std_logic_vector(15 downto 0);
 			
 			-- Decode
@@ -112,6 +113,7 @@ architecture Structure of proc is
 			-- Hit or miss
 			fetch_hit_miss		: in	std_logic;
 			-- Physical addres obtained in previous miss
+			fetch_real_address	: in	std_logic_vector(15 downto 0);
 			fetch_memory_pc		: out	std_logic_vector(15 downto 0);
 			
 			-- Decode
@@ -171,6 +173,7 @@ architecture Structure of proc is
 	-- Hit or miss
 	signal fetch_hit_miss		: std_logic;
 	-- Physical addres obtained in previous miss
+	signal fetch_real_address	: std_logic_vector(15 downto 0);
 	signal fetch_memory_pc		: std_logic_vector(15 downto 0);
 			
 	-- Decode	
@@ -236,6 +239,7 @@ begin
 		-- Hit or miss
 		fetch_hit_miss		=> fetch_hit_miss,
 		-- Physical addres obtained in previous miss
+		fetch_real_address	=> fetch_real_address,
 		fetch_memory_pc		=> fetch_memory_pc,
 		
 		-- Decode
@@ -309,6 +313,7 @@ begin
 		-- Hit or miss
 		fetch_hit_miss		=> fetch_hit_miss,
 		-- Physical addres obtained in previous miss
+		fetch_real_address	=> fetch_real_address,
 		fetch_memory_pc		=> fetch_memory_pc,
 		
 		-- Decode		
