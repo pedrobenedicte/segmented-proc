@@ -80,7 +80,8 @@ architecture Structure of control_unit is
 	
 	type reg_stages is array (11 downto 0) of reg_stages_entry;
 	
-	signal rstages	: reg_stages;
+	signal rstages				: reg_stages;
+	signal decode_tmp_rstage	: reg_stages_entry;
 	
 	signal newPC	: std_logic_vector(15 downto 0);
 
@@ -129,13 +130,28 @@ architecture Structure of control_unit is
 	signal ctrl_pc	: std_logic_vector(1 downto 0) := "00";
 	signal ir		: std_logic_vector(15 downto 0);
 	
-	procedure move_stages_info(	signal rstages	: inout	reg_stages; 
-								src 			: in	integer;
-								dest 			: in	integer) is
+	
+	procedure feed_decode_stage(	signal rstages	: inout	reg_stages;
+									signal tmp		: in reg_stages_entry) is
 	begin
-		rstages(dest).int 	<= rstages(src).int;
-		rstages(dest).exc 	<= rstages(src).exc;
-		rstages(dest).pc 	<= rstages(src).pc;
+		rstages(DECODE).int 	<= tmp.int;
+		rstages(DECODE).exc 	<= tmp.exc;
+		rstages(DECODE).pc 		<= tmp.pc;
+		rstages(DECODE).addr_d 	<= tmp.addr_d;
+		rstages(DECODE).addr_a 	<= tmp.addr_a;
+		rstages(DECODE).addr_b 	<= tmp.addr_b;
+		rstages(DECODE).opclass <= tmp.opclass;
+		rstages(DECODE).opcode 	<= tmp.opcode;
+	end procedure;
+	
+	
+	procedure move_stages_info(	signal rstages	: inout	reg_stages;
+								variable src 	: in	integer;
+								variable dest 	: in	integer) is
+	begin
+		rstages(dest).int 		<= rstages(src).int;
+		rstages(dest).exc 		<= rstages(src).exc;
+		rstages(dest).pc 		<= rstages(src).pc;
 		rstages(dest).addr_d 	<= rstages(src).addr_d;
 		rstages(dest).addr_a 	<= rstages(src).addr_a;
 		rstages(dest).addr_b 	<= rstages(src).addr_b;
@@ -144,16 +160,23 @@ architecture Structure of control_unit is
 	end procedure;
 	
 	procedure do_pipeline_step ( signal rstages	: inout	reg_stages) is
-		variable i	: integer := 0;
+		variable i	: integer := DECODE;
+		variable j	: integer := ALU;
 	begin
 		while i < MEMWB loop
-			move_stages_info(rstages, i, i+1);
+			move_stages_info(rstages, i, j);
+			i := i+1;
+			j := j+1;
 		end loop;
-		
-		move_stages_info(rstages, DECODE, FOP1);
+		i := DECODE;
+		j := FOP1;
+		move_stages_info(rstages, i, j);
 		i := FOP1;
+		j := FOP2;
 		while i < FOPWB loop
-			move_stages_info(rstages, i, i+1);
+			move_stages_info(rstages, i, j);
+			i := i+1;
+			j := j+1;
 		end loop;
 	end procedure;
 	
@@ -234,9 +257,9 @@ architecture Structure of control_unit is
 	
 begin
 
-	ir <= decode_ir;
-
 	-- Instruction decode
+		ir <= decode_ir;
+		
 		opclass	<= ir(15 downto 13);
 		opcode	<= ir(12 downto 11);
 		addr_a 	<= ir(5 downto 3);
@@ -249,6 +272,15 @@ begin
 			immed	<=	ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10 DOWNTO 6) 	when MEM,
 						ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10 DOWNTO 3) 						when BNZ,
 						debug	when others;
+		
+		decode_tmp_rstage.int		<= '0';
+		decode_tmp_rstage.exc		<= '0';
+		decode_tmp_rstage.pc		<= rstages(FETCH).pc; -- TODO revisit
+		decode_tmp_rstage.addr_d	<= addr_d;
+		decode_tmp_rstage.addr_a	<= addr_a;
+		decode_tmp_rstage.addr_b	<= addr_b;
+		decode_tmp_rstage.opclass	<= opclass;
+		decode_tmp_rstage.opcode	<= opcode;
 
 	
 	-- Bypasses control 
@@ -319,13 +351,9 @@ begin
 				rstages(FETCH).pc	<= "1100000000000000";
 				-- inizialitation
 			else
-				
-				do_pipeline_step(rstages);
-				
-				-- if exception/interruption
-				-- elsif branch
-				-- else +4
 				rstages(FETCH).pc	<= newPC;
+				feed_decode_stage(rstages, decode_tmp_rstage);
+				do_pipeline_step(rstages);
 			end if;
 		end if;
 	end process;
