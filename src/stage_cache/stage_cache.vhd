@@ -5,7 +5,7 @@ use ieee.std_logic_unsigned.all;
 
 entity stage_cache is
 	port (
-		clock		: in	std_logic;
+		clk		: in	std_logic;
 		reset		: in std_logic;
 		stall		: in	std_logic;
 		nop			: in	std_logic;
@@ -65,7 +65,7 @@ architecture Structure of stage_cache is
 	
 begin
 	cache : cache_d(
-		clk					=> clock,
+		clk					=> clk,
 		boot				=> reset,
 		r_w					=> mode_r_w,
 		cache_mem			=> mode_c_m,

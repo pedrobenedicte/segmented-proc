@@ -5,7 +5,7 @@ use ieee.std_logic_unsigned.all;
 
 entity stage_lookup is
 	port (
-		clock				: in	std_logic;
+		clk				: in	std_logic;
 		reset				: in 	std_logic;
 		stall				: in	std_logic;
 		
@@ -72,11 +72,16 @@ architecture Structure of stage_lookup is
 	signal addess_tlb		: std_logic_vector(15 downto 0);
 	signal addess_tag		: std_logic_vector(15 downto 0);
 	
+	signal u_a_tlb			: integer;
+	signal u_a_tag			: integer;
 begin
 	lookup_exception <= not tlb_hit;
-
-	tags : tags_d (
-			clk				=> clock,
+	u_a_tlb <= to_integer(unsigned(addess_tlb));
+	u_a_tag <= to_integer(unsigned(addess_tag));
+	
+	tags : tags_d 
+		port map (
+			clk				=> clk,
 			boot			=> reset,
 			we				=> lookup,
 			read_write		=> load_store,
@@ -87,8 +92,9 @@ begin
 			wb_tag			=> wb_tag
 		);
 
-	tlb : tlb_d (
-			clk				=> clock,
+	tlb : tlb_d
+		port map (
+			clk				=> clk,
 			boot			=> reset,
 			we				=> lookup,
 			add_logical		=> ff_addr_mem,
@@ -102,8 +108,9 @@ begin
 						bp_data_fwb		when "11",
 						debug			when others;
 
-	hit_miss <= tag_hit and (addess_tag = addess_tlb);
-						
+	hit_miss <= '1' when ((tag_hit = '1') and (u_a_tlb = u_a_tag))
+				else '0';		
+	
 	process (clk)
 	begin
 		if (rising_edge(clk)) then
