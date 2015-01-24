@@ -16,9 +16,6 @@ entity control_unit is
 		fetch_pc			: out	std_logic_vector(15 downto 0);
 		
 		-- Decode
-		decode_opclass		: out	std_logic_vector(2 downto 0);
-		decode_opcode		: out	std_logic_vector(1 downto 0);
-		
 		decode_awb_addr_d	: out	std_logic_vector(2 downto 0);
 		decode_mwb_addr_d	: out	std_logic_vector(2 downto 0);
 		decode_fwb_addr_d	: out	std_logic_vector(2 downto 0);
@@ -34,8 +31,14 @@ entity control_unit is
 		decode_ir			: in	std_logic_vector(15 downto 0);
 		
 		-- Alu
+		alu_opclass			: out	std_logic_vector(2 downto 0);
+		alu_opcode			: out	std_logic_vector(1 downto 0);
 		alu_w				: in	std_logic_vector(15 downto 0);
 		alu_z				: in	std_logic;
+		
+		-- Cache
+		cache_opclass		: out	std_logic_vector(2 downto 0);
+		cache_opcode		: out	std_logic_vector(1 downto 0);
 		
 		-- Bypasses control
 		bypasses_ctrl_a		: out	std_logic_vector(3 downto 0); -- A, F1

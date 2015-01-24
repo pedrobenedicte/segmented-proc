@@ -11,8 +11,6 @@ entity stage_decode is
 		
 		-- flipflop inputs
 		ff_ir		: in	std_logic_vector(15 downto 0);
-		ff_opclass	: in	std_logic_vector(2 downto 0);
-		ff_opcode	: in	std_logic_vector(1 downto 0);
 		
 		-- Value and addr of d to be written in Regfile.
 		-- Also used as bypasses for a and b
@@ -34,8 +32,6 @@ entity stage_decode is
 		immed		: in	std_logic_vector(15 downto 0);
 		
 		ir			: out	std_logic_vector(15 downto 0);
-		opclass		: out	std_logic_vector(2 downto 0);
-		opcode		: out	std_logic_vector(1 downto 0);
 		mem_data	: out	std_logic_vector(15 downto 0)
 	);
 end stage_decode;
@@ -104,8 +100,6 @@ begin
 			elsif nop = '1' then
 			else
 				ir 	<= ff_ir;
-				opclass	<= ff_opclass;
-				opcode	<= ff_opcode;
 			end if;
 		end if;
 	end process;

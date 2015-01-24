@@ -16,9 +16,6 @@ entity datapath is
 		fetch_pc			: in	std_logic_vector(15 downto 0);
 		
 		-- Decode
-		decode_opclass		: in	std_logic_vector(2 downto 0);
-		decode_opcode		: in	std_logic_vector(1 downto 0);
-		
 		decode_awb_addr_d	: in	std_logic_vector(2 downto 0);
 		decode_mwb_addr_d	: in	std_logic_vector(2 downto 0);
 		decode_fwb_addr_d	: in	std_logic_vector(2 downto 0);
@@ -34,8 +31,14 @@ entity datapath is
 		decode_ir			: out	std_logic_vector(15 downto 0);
 		
 		-- Alu
+		alu_opclass			: in	std_logic_vector(2 downto 0);
+		alu_opcode			: in	std_logic_vector(1 downto 0);
 		alu_w				: out	std_logic_vector(15 downto 0);
 		alu_z				: out	std_logic;
+		
+		-- Cache
+		cache_opclass		: in	std_logic_vector(2 downto 0);
+		cache_opcode		: in	std_logic_vector(1 downto 0);
 		
 		-- Memories
 		-- Instructions memory
@@ -94,8 +97,6 @@ architecture Structure OF datapath is
 			
 			-- flipflop inputs
 			ff_ir		: in	std_logic_vector(15 downto 0);
-			ff_opclass	: in	std_logic_vector(2 downto 0);
-			ff_opcode	: in	std_logic_vector(1 downto 0);
 			
 			-- Value and addr of d to be written in Regfile.
 			-- Also used as bypasses for a and b
@@ -117,8 +118,6 @@ architecture Structure OF datapath is
 			immed		: in	std_logic_vector(15 downto 0);
 			
 			ir			: out	std_logic_vector(15 downto 0);
-			opclass		: out	std_logic_vector(2 downto 0);
-			opcode		: out	std_logic_vector(1 downto 0);
 			mem_data	: out	std_logic_vector(15 downto 0)
 		);
 	end component;
@@ -181,6 +180,8 @@ architecture Structure OF datapath is
 			-- flipflop inputs
 			ff_addr_mem	: in	std_logic_vector(15 downto 0);
 			ff_mem_data	: in	std_logic_vector(15 downto 0);
+			ff_opclass	: in 	std_logic_vector(2 downto 0);
+			ff_opcode	: in	std_logic_vector(1 downto 0);
 			
 			-- Bypasses control and sources
 			bp_ctrl_mem	: in	std_logic_vector(1 downto 0);
@@ -300,13 +301,13 @@ architecture Structure OF datapath is
 	signal f2d_ir			: std_logic_vector(15 downto 0);
 	signal d2a_a			: std_logic_vector(15 downto 0);
 	signal d2a_b			: std_logic_vector(15 downto 0);
-	signal d2a_opclass		: std_logic_vector(2 downto 0);
-	signal d2a_opcode		: std_logic_vector(1 downto 0);
 	signal d2a_mem_data		: std_logic_vector(15 downto 0);
 	signal a2l_mem_data		: std_logic_vector(15 downto 0);
 	signal l2c_mem_data		: std_logic_vector(15 downto 0);
 	signal l2c_addr_mem		: std_logic_vector(15 downto 0);
 	signal c2mwb_load_data	: std_logic_vector(15 downto 0);
+	
+	signal alu_out			: std_logic_vector(15 downto 0);
 	
 	signal f1_f2_fop_data	: std_logic_vector(15 downto 0);
 	signal f2_f3_fop_data	: std_logic_vector(15 downto 0);
@@ -339,8 +340,6 @@ begin
 		
 		-- flipflop inputs
 		ff_ir		=> f2d_ir,
-		ff_opclass	=> decode_opclass,
-		ff_opcode	=> decode_opcode,
 		
 		-- Write to d
 		artm_d		=> aluwb_data,
@@ -361,8 +360,6 @@ begin
 		immed		=> decode_immed,
 		
 		ir			=> decode_ir,
-		opclass		=> d2a_opclass,
-		opcode		=> d2a_opcode,
 		mem_data	=> d2a_mem_data
 	);
 	
@@ -376,8 +373,8 @@ begin
 		ff_a		=> d2a_a,
 		ff_b		=> d2a_b,
 		ff_mem_data	=> d2a_mem_data,
-		ff_opclass	=> d2a_opclass,
-		ff_opcode	=> d2a_opcode,
+		ff_opclass	=> alu_opclass,
+		ff_opcode	=> alu_opcode,
 		
 		-- Bypasses control and sources
 		bp_ctrl_a	=> bypasses_ctrl_a(1 downto 0),
@@ -387,10 +384,12 @@ begin
 		bp_data_mwb	=> memwb_data,
 		bp_data_fwb	=> fopwb_data,
 		
-		w			=> alu_w,
+		w			=> alu_out,
 		z			=> alu_z,
 		mem_data	=> a2l_mem_data
 	);
+	
+	alu_w <= alu_out;
 	
 	lk	: stage_lookup
 	port map (
@@ -400,7 +399,7 @@ begin
 		nop			=> base_nop_vector(LOOKUP),
 		
 		-- flipflop inputs
-		ff_addr_mem	=> l2c_addr_mem,
+		ff_addr_mem	=> alu_out,
 		ff_mem_data	=> a2l_mem_data,
 		
 		-- Bypasses control and sources
@@ -409,6 +408,7 @@ begin
 		bp_data_fwb	=> fopwb_data,
 		
 		aluwb		=> aluwb_data,
+		addr_mem	=> l2c_addr_mem,
 		mem_data	=> l2c_mem_data
 	);
 	
@@ -421,6 +421,8 @@ begin
 		-- flipflop inputs
 		ff_addr_mem	=> l2c_addr_mem,
 		ff_mem_data	=> l2c_mem_data,
+		ff_opclass	=> cache_opclass,
+		ff_opcode	=> cache_opcode,
 		
 		-- Bypasses control and sources
 		bp_ctrl_mem	=> bypasses_ctrl_mem(5 downto 4),

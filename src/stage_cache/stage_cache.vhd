@@ -12,6 +12,8 @@ entity stage_cache is
 		-- flipflop inputs
 		ff_addr_mem	: in	std_logic_vector(15 downto 0);
 		ff_mem_data	: in	std_logic_vector(15 downto 0);
+		ff_opclass	: in 	std_logic_vector(2 downto 0);
+		ff_opcode	: in	std_logic_vector(1 downto 0);
 		
 		-- Bypasses control and sources
 		bp_ctrl_mem	: in	std_logic_vector(1 downto 0);
@@ -35,6 +37,8 @@ architecture Structure of stage_cache is
 	signal addr_mem		: std_logic_vector(15 downto 0);
 	signal mem_data_lk	: std_logic_vector(15 downto 0);
 	signal mem_data		: std_logic_vector(15 downto 0);
+	signal opclass		: std_logic_vector(2 downto 0);
+	signal opcode		: std_logic_vector(1 downto 0);
 
 begin
 
@@ -53,6 +57,8 @@ begin
 			else
 				addr_mem 	<= ff_addr_mem;
 				mem_data_lk	<= ff_mem_data;
+				opclass		<= ff_opclass;
+				opcode		<= ff_opcode;
 			end if;
 		end if;
 	end process;

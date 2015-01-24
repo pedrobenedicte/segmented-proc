@@ -36,9 +36,6 @@ architecture Structure of proc is
 			fetch_pc			: in	std_logic_vector(15 downto 0);
 			
 			-- Decode
-			decode_opclass		: in	std_logic_vector(2 downto 0);
-			decode_opcode		: in	std_logic_vector(1 downto 0);
-			
 			decode_awb_addr_d	: in	std_logic_vector(2 downto 0);
 			decode_mwb_addr_d	: in	std_logic_vector(2 downto 0);
 			decode_fwb_addr_d	: in	std_logic_vector(2 downto 0);
@@ -54,9 +51,15 @@ architecture Structure of proc is
 			decode_ir			: out	std_logic_vector(15 downto 0);
 			
 			-- Alu
+			alu_opclass			: in	std_logic_vector(2 downto 0);
+			alu_opcode			: in	std_logic_vector(1 downto 0);
 			alu_w				: out	std_logic_vector(15 downto 0);
 			alu_z				: out	std_logic;
 			
+			-- Cache
+			cache_opclass		: in	std_logic_vector(2 downto 0);
+			cache_opcode		: in	std_logic_vector(1 downto 0);
+		
 			-- Memories
 			-- Instructions memory
 			imem_addr			: out	std_logic_vector(15 downto 0);
@@ -88,9 +91,6 @@ architecture Structure of proc is
 			fetch_pc			: out	std_logic_vector(15 downto 0);
 			
 			-- Decode
-			decode_opclass		: out	std_logic_vector(2 downto 0);
-			decode_opcode		: out	std_logic_vector(1 downto 0);
-			
 			decode_awb_addr_d	: out	std_logic_vector(2 downto 0);
 			decode_mwb_addr_d	: out	std_logic_vector(2 downto 0);
 			decode_fwb_addr_d	: out	std_logic_vector(2 downto 0);
@@ -106,8 +106,14 @@ architecture Structure of proc is
 			decode_ir			: in	std_logic_vector(15 downto 0);
 			
 			-- Alu
+			alu_opclass			: out	std_logic_vector(2 downto 0);
+			alu_opcode			: out	std_logic_vector(1 downto 0);
 			alu_w				: in	std_logic_vector(15 downto 0);
 			alu_z				: in	std_logic;
+			
+			-- Cache
+			cache_opclass		: out	std_logic_vector(2 downto 0);
+			cache_opcode		: out	std_logic_vector(1 downto 0);
 			
 			-- Bypasses control
 			bypasses_ctrl_a		: out	std_logic_vector(3 downto 0); -- A, F1
@@ -125,10 +131,7 @@ architecture Structure of proc is
 	-- Fetch
 	signal fetch_pc				: std_logic_vector(15 downto 0);
 	
-	-- Decode
-	signal decode_opclass		: std_logic_vector(2 downto 0);
-	signal decode_opcode		: std_logic_vector(1 downto 0);
-	
+	-- Decode	
 	signal decode_awb_addr_d	: std_logic_vector(2 downto 0);
 	signal decode_mwb_addr_d	: std_logic_vector(2 downto 0);
 	signal decode_fwb_addr_d	: std_logic_vector(2 downto 0);
@@ -144,8 +147,14 @@ architecture Structure of proc is
 	signal decode_ir			: std_logic_vector(15 downto 0);
 	
 	-- Alu
+	signal alu_opclass			: std_logic_vector(2 downto 0);
+	signal alu_opcode			: std_logic_vector(1 downto 0);
 	signal alu_w				: std_logic_vector(15 downto 0);
 	signal alu_z				: std_logic;
+	
+	-- Cache
+	signal cache_opclass		: std_logic_vector(2 downto 0);
+	signal cache_opcode			: std_logic_vector(1 downto 0);
 
 	-- Bypasses control
 	signal bypasses_ctrl_a		: std_logic_vector(3 downto 0); -- A
@@ -153,6 +162,8 @@ architecture Structure of proc is
 	signal bypasses_ctrl_mem	: std_logic_vector(5 downto 0); -- A, WB/L, C
 	
 begin
+
+	imem_we	<= '0';
 
 	dp : datapath
 	port map (
@@ -167,9 +178,6 @@ begin
 		fetch_pc			=> fetch_pc,
 		
 		-- Decode
-		decode_opclass		=> decode_opclass,
-		decode_opcode		=> decode_opcode,
-		
 		decode_awb_addr_d	=> decode_awb_addr_d,
 		decode_mwb_addr_d	=> decode_mwb_addr_d,
 		decode_fwb_addr_d	=> decode_fwb_addr_d,
@@ -185,8 +193,14 @@ begin
 		decode_ir			=> decode_ir,
 		
 		-- Alu
+		alu_opclass			=> alu_opclass,
+		alu_opcode			=> alu_opcode,
 		alu_w				=> alu_w,
 		alu_z				=> alu_z,
+		
+		-- Cache
+		cache_opclass		=> cache_opclass,
+		cache_opcode		=> cache_opcode,
 		
 		-- Memories
 		-- Instructions memory
@@ -217,10 +231,7 @@ begin
 		-- Fetch
 		fetch_pc			=> fetch_pc,
 		
-		-- Decode
-		decode_opclass		=> decode_opclass,
-		decode_opcode		=> decode_opcode,
-		
+		-- Decode		
 		decode_awb_addr_d	=> decode_awb_addr_d,
 		decode_mwb_addr_d	=> decode_mwb_addr_d,
 		decode_fwb_addr_d	=> decode_fwb_addr_d,
@@ -236,8 +247,14 @@ begin
 		decode_ir			=> decode_ir,
 		
 		-- Alu
+		alu_opclass			=> alu_opclass,
+		alu_opcode			=> alu_opcode,
 		alu_w				=> alu_w,
 		alu_z				=> alu_z,
+		
+		-- Cache
+		cache_opclass		=> cache_opclass,
+		cache_opcode		=> cache_opcode,
 		
 		-- Bypasses control
 		bypasses_ctrl_a		=> bypasses_ctrl_a,
