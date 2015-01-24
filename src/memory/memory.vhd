@@ -67,7 +67,7 @@ begin
     begin
 		if (clk'event and clk = '1') then
 			if boot = '1' then
-				Load_FitxerDadesMemoria(mem);
+				Load_FitxerDadesMemoria(mem, imem);
 			else
 				if (we = '1') then
 					mem(conv_integer(addr))		<= wr_data(7 downto 0);

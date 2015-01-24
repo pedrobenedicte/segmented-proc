@@ -7,9 +7,9 @@ entity proc is
 		boot			: in std_logic;
 		
 		-- Instructions memory
-		imem_we			: out	std_logic;
+		imem_we			: out	std_logic; 						-- not used
 		imem_addr		: out	std_logic_vector(15 downto 0);
-		imem_wr_data	: out	std_logic_vector(63 downto 0);
+		imem_wr_data	: out	std_logic_vector(63 downto 0);	-- not used
 		imem_rd_data	: in	std_logic_vector(63 downto 0);
 		
 		-- Data memory
@@ -57,21 +57,21 @@ architecture Structure of proc is
 			alu_w				: out	std_logic_vector(15 downto 0);
 			alu_z				: out	std_logic;
 			
-			-- Lookup
-			-- Data tlb
-			we_dtlb				: in 	std_logic;
-			hit_miss_dtlb		: out	std_logic;
+			-- Memories
+			-- Instructions memory
+			imem_addr			: out	std_logic_vector(15 downto 0);
+			imem_rd_data		: in	std_logic_vector(63 downto 0);
 			
-			-- Data tags cache
-			we_dtags			: in 	std_logic;
-			read_write_dtags	: in 	std_logic;
-			hit_miss_dtags		: out	std_logic;
-			wb_dtags			: out	std_logic;
+			-- Data memory
+			dmem_we				: out	std_logic;
+			dmem_addr			: out	std_logic_vector(15 downto 0);
+			dmem_wr_data		: out	std_logic_vector(63 downto 0);
+			dmem_rd_data		: in	std_logic_vector(63 downto 0);
 			
 			-- Bypasses control
-			bypasses_ctrl_a		: in	std_logic_vector(3 downto 0); -- D, A
-			bypasses_ctrl_b		: in	std_logic_vector(3 downto 0); -- D, A
-			bypasses_ctrl_mem	: in	std_logic_vector(7 downto 0)  -- D, A, WB/L, C
+			bypasses_ctrl_a		: in	std_logic_vector(3 downto 0); -- A, F1
+			bypasses_ctrl_b		: in	std_logic_vector(3 downto 0); -- A, F1
+			bypasses_ctrl_mem	: in	std_logic_vector(5 downto 0)  -- A, WB/L, C
 		);
 	end component;
 
@@ -109,21 +109,10 @@ architecture Structure of proc is
 			alu_w				: in	std_logic_vector(15 downto 0);
 			alu_z				: in	std_logic;
 			
-			-- Lookup
-			-- Data tlb
-			we_dtlb				: out 	std_logic;
-			hit_miss_dtlb		: in	std_logic;
-			
-			-- Data tags cache
-			we_dtags			: out 	std_logic;
-			read_write_dtags	: out 	std_logic;
-			hit_miss_dtags		: in	std_logic;
-			wb_dtags			: in	std_logic;
-			
 			-- Bypasses control
-			bypasses_ctrl_a		: out	std_logic_vector(3 downto 0); -- D, A
-			bypasses_ctrl_b		: out	std_logic_vector(3 downto 0); -- D, A
-			bypasses_ctrl_mem	: out	std_logic_vector(7 downto 0)  -- D, A, WB/L, C
+			bypasses_ctrl_a		: out	std_logic_vector(3 downto 0); -- A, F1
+			bypasses_ctrl_b		: out	std_logic_vector(3 downto 0); -- A, F1
+			bypasses_ctrl_mem	: out	std_logic_vector(5 downto 0)  -- A, WB/L, C
 		);
 	end component;
 	
@@ -158,21 +147,10 @@ architecture Structure of proc is
 	signal alu_w				: std_logic_vector(15 downto 0);
 	signal alu_z				: std_logic;
 
-	-- Lookup
-	-- Data tlb
-	signal we_dtlb			: std_logic;
-	signal hit_miss_dtlb	: std_logic;
-
-	-- Data tags cache
-	signal we_dtags			: std_logic;
-	signal read_write_dtags	: std_logic;
-	signal hit_miss_dtags	: std_logic;
-	signal wb_dtags			: std_logic;
-	
 	-- Bypasses control
-	signal bypasses_ctrl_a		: std_logic_vector(3 downto 0); -- D, A
-	signal bypasses_ctrl_b		: std_logic_vector(3 downto 0); -- D, A
-	signal bypasses_ctrl_mem	: std_logic_vector(7 downto 0);  -- D, A, WB/L, C
+	signal bypasses_ctrl_a		: std_logic_vector(3 downto 0); -- A
+	signal bypasses_ctrl_b		: std_logic_vector(3 downto 0); -- A
+	signal bypasses_ctrl_mem	: std_logic_vector(5 downto 0); -- A, WB/L, C
 	
 begin
 
@@ -210,16 +188,16 @@ begin
 		alu_w				=> alu_w,
 		alu_z				=> alu_z,
 		
-		-- Lookup
-		-- Data tlb
-		we_dtlb				=> we_dtlb,
-		hit_miss_dtlb		=> hit_miss_dtlb,
-
-		-- Data tags cache
-		we_dtags			=> we_dtags,
-		read_write_dtags	=> read_write_dtags,
-		hit_miss_dtags		=> hit_miss_dtags,
-		wb_dtags			=> wb_dtags,
+		-- Memories
+		-- Instructions memory
+		imem_addr			=> imem_addr,
+		imem_rd_data		=> imem_rd_data,
+		
+		-- Data memory
+		dmem_we				=> dmem_we,
+		dmem_addr			=> dmem_addr,
+		dmem_wr_data		=> dmem_wr_data,
+		dmem_rd_data		=> dmem_rd_data,
 		
 		-- Bypasses control
 		bypasses_ctrl_a		=> bypasses_ctrl_a,
@@ -260,17 +238,6 @@ begin
 		-- Alu
 		alu_w				=> alu_w,
 		alu_z				=> alu_z,
-		
-		-- Lookup
-		-- Data tlb
-		we_dtlb				=> we_dtlb,
-		hit_miss_dtlb		=> hit_miss_dtlb,
-
-		-- Data tags cache
-		we_dtags			=> we_dtags,
-		read_write_dtags	=> read_write_dtags,
-		hit_miss_dtags		=> hit_miss_dtags,
-		wb_dtags			=> wb_dtags,
 		
 		-- Bypasses control
 		bypasses_ctrl_a		=> bypasses_ctrl_a,

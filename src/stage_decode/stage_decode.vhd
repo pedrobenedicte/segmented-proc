@@ -33,11 +33,6 @@ entity stage_decode is
 		ctrl_immed	: in	std_logic;						-- Select immed over a to use it
 		immed		: in	std_logic_vector(15 downto 0);
 		
-		-- Bypasses control
-		bp_ctrl_a	: in	std_logic_vector(1 downto 0);
-		bp_ctrl_b	: in	std_logic_vector(1 downto 0);
-		bp_ctrl_mem	: in	std_logic_vector(1 downto 0);
-		
 		ir			: out	std_logic_vector(15 downto 0);
 		opclass		: out	std_logic_vector(2 downto 0);
 		opcode		: out	std_logic_vector(1 downto 0);
@@ -65,8 +60,6 @@ architecture Structure of stage_decode is
 
 	signal rf_a				:	std_logic_vector(15 downto 0);
 	signal rf_b				:	std_logic_vector(15 downto 0);
-	signal a_regsource		:	std_logic_vector(15 downto 0);
-	signal selected_b		:	std_logic_vector(15 downto 0);
 	signal selected_d		:	std_logic_vector(15 downto 0);
 	signal selected_addr_d	:	std_logic_vector(2 downto 0);
 	
@@ -96,29 +89,13 @@ begin
 							fwb_addr_d	when "10",
 							"000"		when others;
 
-	--Bypasses and immed routing
-	with bp_ctrl_a select
-		a_regsource	<=	rf_a	when "00",
-						artm_d	when "01",
-						mem_d	when "10",
-						fop_d	when "11";
 	
 	with ctrl_immed select
-		a	<=	a_regsource	when '0',
-				immed		when '1';
+		a	<=	rf_a	when '0',
+				immed	when '1';
 	
-	
-	with bp_ctrl_b select
-		b	<=	rf_b	when "00",
-				artm_d	when "01",
-				mem_d	when "10",
-				fop_d	when "11";
-
-	with bp_ctrl_mem select
-		mem_data	<=	rf_a	when "00",
-						artm_d	when "01",
-						mem_d	when "10",
-						fop_d	when "11";
+	b			<=	rf_b;
+	mem_data	<=	rf_a;
 
 	process (clk)
 	begin

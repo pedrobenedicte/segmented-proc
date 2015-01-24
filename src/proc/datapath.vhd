@@ -37,21 +37,21 @@ entity datapath is
 		alu_w				: out	std_logic_vector(15 downto 0);
 		alu_z				: out	std_logic;
 		
-		-- Lookup
-		-- Data tlb
-		we_dtlb				: in 	std_logic;
-		hit_miss_dtlb		: out	std_logic;
+		-- Memories
+		-- Instructions memory
+		imem_addr			: out	std_logic_vector(15 downto 0);
+		imem_rd_data		: in	std_logic_vector(63 downto 0);
 		
-		-- Data tags cache
-		we_dtags			: in 	std_logic;
-		read_write_dtags	: in 	std_logic;
-		hit_miss_dtags		: out	std_logic;
-		wb_dtags			: out	std_logic;
+		-- Data memory
+		dmem_we				: out	std_logic;
+		dmem_addr			: out	std_logic_vector(15 downto 0);
+		dmem_wr_data		: out	std_logic_vector(63 downto 0);
+		dmem_rd_data		: in	std_logic_vector(63 downto 0);
 		
 		-- Bypasses control
-		bypasses_ctrl_a		: in	std_logic_vector(3 downto 0); -- D, A
-		bypasses_ctrl_b		: in	std_logic_vector(3 downto 0); -- D, A
-		bypasses_ctrl_mem	: in	std_logic_vector(7 downto 0)  -- D, A, WB/L, C
+		bypasses_ctrl_a		: in	std_logic_vector(3 downto 0); -- A, F1
+		bypasses_ctrl_b		: in	std_logic_vector(3 downto 0); -- A, F1
+		bypasses_ctrl_mem	: in	std_logic_vector(5 downto 0)  -- A, WB/L, C
 	);
 end datapath;
 
@@ -75,10 +75,14 @@ architecture Structure OF datapath is
 
 	component stage_fetch is
 		port (
-			clk			: in	std_logic;
-			stall		: in	std_logic;
-			pc			: in	std_logic_vector(15 downto 0);
-			ir			: out	std_logic_vector(15 downto 0)
+			clk				: in	std_logic;
+			stall			: in	std_logic;
+			
+			imem_addr		: out	std_logic_vector(15 downto 0);
+			imem_rd_data	: in	std_logic_vector(63 downto 0);
+			
+			pc				: in	std_logic_vector(15 downto 0);
+			ir				: out	std_logic_vector(15 downto 0)
 		);
 	end component;
 	
@@ -111,11 +115,6 @@ architecture Structure OF datapath is
 			ctrl_d		: in 	std_logic_vector(1 downto 0);	-- Select source for d write
 			ctrl_immed	: in 	std_logic;						-- Select immed over a to use it
 			immed		: in	std_logic_vector(15 downto 0);
-			
-			-- Bypasses control
-			bp_ctrl_a	: in	std_logic_vector(1 downto 0);
-			bp_ctrl_b	: in	std_logic_vector(1 downto 0);
-			bp_ctrl_mem	: in	std_logic_vector(1 downto 0);
 			
 			ir			: out	std_logic_vector(15 downto 0);
 			opclass		: out	std_logic_vector(2 downto 0);
@@ -158,16 +157,6 @@ architecture Structure OF datapath is
 			nop				: in	std_logic;
 			boot			: in 	std_logic;
 			
-			-- Data tlb
-			we_dtlb			: in 	std_logic;
-			hit_miss_dtlb	: out	std_logic;
-			
-			-- Data tags cache
-			we_dtags		: in 	std_logic;
-			read_write_dtags: in 	std_logic;
-			hit_miss_dtags	: out	std_logic;
-			wb_dtags		: out	std_logic;
-			
 			-- flipflop inputs
 			ff_addr_mem		: in	std_logic_vector(15 downto 0);
 			ff_mem_data		: in	std_logic_vector(15 downto 0);
@@ -198,6 +187,12 @@ architecture Structure OF datapath is
 			bp_data_mwb	: in	std_logic_vector(15 downto 0);
 			bp_data_fwb	: in	std_logic_vector(15 downto 0);
 			
+			-- Data memory
+			dmem_we		: out	std_logic;
+			dmem_addr	: out	std_logic_vector(15 downto 0);
+			dmem_wr_data: out	std_logic_vector(63 downto 0);
+			dmem_rd_data: in	std_logic_vector(63 downto 0);
+			
 			load_data	: out	std_logic_vector(15 downto 0)
 		);
 	end component;
@@ -224,6 +219,13 @@ architecture Structure OF datapath is
 			-- flipflop inputs
 			ff_a		: in	std_logic_vector(15 downto 0);
 			ff_b		: in	std_logic_vector(15 downto 0);
+			
+			-- Bypasses control and sources
+			bp_ctrl_a	: in	std_logic_vector(1 downto 0);
+			bp_ctrl_b	: in	std_logic_vector(1 downto 0);
+			bp_data_awb	: in	std_logic_vector(15 downto 0);
+			bp_data_mwb	: in	std_logic_vector(15 downto 0);
+			bp_data_fwb	: in	std_logic_vector(15 downto 0);
 			
 			fop_data	: out	std_logic_vector(15 downto 0)
 		);
@@ -323,6 +325,8 @@ begin
 	port map (
 		clk			=> clk,
 		stall		=> base_stall_vector(FETCH),
+		imem_addr	=> imem_addr,
+		imem_rd_data=> imem_rd_data,
 		pc			=> fetch_pc,
 		ir			=> f2d_ir
 	);
@@ -356,11 +360,6 @@ begin
 		ctrl_immed	=> decode_ctrl_immed,
 		immed		=> decode_immed,
 		
-		-- Bypasses control
-		bp_ctrl_a	=> bypasses_ctrl_a(1 downto 0),
-		bp_ctrl_b	=> bypasses_ctrl_b(1 downto 0),
-		bp_ctrl_mem	=> bypasses_ctrl_mem(1 downto 0),
-		
 		ir			=> decode_ir,
 		opclass		=> d2a_opclass,
 		opcode		=> d2a_opcode,
@@ -381,9 +380,9 @@ begin
 		ff_opcode	=> d2a_opcode,
 		
 		-- Bypasses control and sources
-		bp_ctrl_a	=> bypasses_ctrl_a(3 downto 2),
-		bp_ctrl_b	=> bypasses_ctrl_b(3 downto 2),
-		bp_ctrl_mem	=> bypasses_ctrl_mem(3 downto 2),
+		bp_ctrl_a	=> bypasses_ctrl_a(1 downto 0),
+		bp_ctrl_b	=> bypasses_ctrl_b(1 downto 0),
+		bp_ctrl_mem	=> bypasses_ctrl_mem(1 downto 0),
 		bp_data_awb	=> aluwb_data,
 		bp_data_mwb	=> memwb_data,
 		bp_data_fwb	=> fopwb_data,
@@ -400,22 +399,12 @@ begin
 		stall		=> base_stall_vector(LOOKUP),
 		nop			=> base_nop_vector(LOOKUP),
 		
-		-- Data tlb
-		we_dtlb			=> we_dtlb,
-		hit_miss_dtlb 	=> hit_miss_dtlb,
-
-		-- Data tags cache
-		we_dtags		=> we_dtags,
-		read_write_dtags=> read_write_dtags,
-		hit_miss_dtags	=> hit_miss_dtags,
-		wb_dtags		=> wb_dtags,
-		
 		-- flipflop inputs
 		ff_addr_mem	=> l2c_addr_mem,
 		ff_mem_data	=> a2l_mem_data,
 		
 		-- Bypasses control and sources
-		bp_ctrl_mem	=> bypasses_ctrl_mem(5 downto 4),
+		bp_ctrl_mem	=> bypasses_ctrl_mem(3 downto 2),
 		bp_data_mwb	=> memwb_data,
 		bp_data_fwb	=> fopwb_data,
 		
@@ -434,9 +423,15 @@ begin
 		ff_mem_data	=> l2c_mem_data,
 		
 		-- Bypasses control and sources
-		bp_ctrl_mem	=> bypasses_ctrl_mem(7 downto 6),
+		bp_ctrl_mem	=> bypasses_ctrl_mem(5 downto 4),
 		bp_data_mwb	=> memwb_data,
 		bp_data_fwb	=> fopwb_data,
+		
+		-- Data memory
+		dmem_we		=> dmem_we,
+		dmem_addr	=> dmem_addr,
+		dmem_wr_data=> dmem_wr_data,
+		dmem_rd_data=> dmem_rd_data,
 		
 		load_data	=> c2mwb_load_data
 	);
@@ -463,6 +458,13 @@ begin
 		-- flipflop inputs
 		ff_a		=> d2a_a,
 		ff_b		=> d2a_b,
+		
+		-- Bypasses control and sources
+		bp_ctrl_a	=> bypasses_ctrl_a(3 downto 2),
+		bp_ctrl_b	=> bypasses_ctrl_b(3 downto 2),
+		bp_data_awb	=> aluwb_data,
+		bp_data_mwb	=> memwb_data,
+		bp_data_fwb	=> fopwb_data,
 		
 		fop_data	=> f1_f2_fop_data
 	);

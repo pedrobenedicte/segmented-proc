@@ -10,16 +10,6 @@ entity stage_lookup is
 		nop				: in	std_logic;
 		boot			: in 	std_logic;
 		
-		-- Data tlb
-		we_dtlb			: in 	std_logic;
-		hit_miss_dtlb	: out	std_logic;
-		
-		-- Data tags cache
-		we_dtags		: in 	std_logic;
-		read_write_dtags: in 	std_logic;
-		hit_miss_dtags	: out	std_logic;
-		wb_dtags		: out	std_logic;
-		
 		-- flipflop inputs
 		ff_addr_mem		: in	std_logic_vector(15 downto 0);
 		ff_mem_data		: in	std_logic_vector(15 downto 0);

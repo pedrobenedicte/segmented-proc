@@ -67,13 +67,13 @@ begin
 
 	-- Bypasses
 	with bp_ctrl_a select
-		selected_a	<=	a		when "00",
+		selected_a	<=	a			when "00",
 						bp_data_awb	when "01",
 						bp_data_mwb	when "10",
 						bp_data_fwb	when "11";
 	
 	with bp_ctrl_b select
-		selected_b	<=	b		when "00",
+		selected_b	<=	b			when "00",
 						bp_data_awb	when "01",
 						bp_data_mwb	when "10",
 						bp_data_fwb	when "11";

@@ -18,6 +18,12 @@ entity stage_cache is
 		bp_data_mwb	: in	std_logic_vector(15 downto 0);
 		bp_data_fwb	: in	std_logic_vector(15 downto 0);
 		
+		-- Data memory
+		dmem_we		: out	std_logic;
+		dmem_addr	: out	std_logic_vector(15 downto 0);
+		dmem_wr_data: out	std_logic_vector(63 downto 0);
+		dmem_rd_data: in	std_logic_vector(63 downto 0);
+		
 		load_data	: out	std_logic_vector(15 downto 0)
 	);
 end stage_cache;

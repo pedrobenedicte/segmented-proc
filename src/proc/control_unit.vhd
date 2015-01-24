@@ -37,21 +37,10 @@ entity control_unit is
 		alu_w				: in	std_logic_vector(15 downto 0);
 		alu_z				: in	std_logic;
 		
-		-- Lookup
-		-- Data tlb
-		we_dtlb				: out 	std_logic;
-		hit_miss_dtlb		: in	std_logic;
-
-		-- Data tags cache
-		we_dtags			: out 	std_logic;
-		read_write_dtags	: out 	std_logic;
-		hit_miss_dtags		: in	std_logic;
-		wb_dtags			: in	std_logic;
-		
 		-- Bypasses control
-		bypasses_ctrl_a		: out	std_logic_vector(3 downto 0); -- D, A
-		bypasses_ctrl_b		: out	std_logic_vector(3 downto 0); -- D, A
-		bypasses_ctrl_mem	: out	std_logic_vector(7 downto 0)  -- D, A, WB/L, C
+		bypasses_ctrl_a		: out	std_logic_vector(3 downto 0); -- A, F1
+		bypasses_ctrl_b		: out	std_logic_vector(3 downto 0); -- A, F1
+		bypasses_ctrl_mem	: out	std_logic_vector(5 downto 0)  -- A, WB/L, C
 	);
 end control_unit;
 
@@ -77,12 +66,9 @@ architecture Structure of control_unit is
 	
 	signal newPC	: std_logic_vector(15 downto 0);
 
-	signal bypass_dec_ctrl_a	: std_logic_vector(1 downto 0);
 	signal bypass_alu_ctrl_a	: std_logic_vector(1 downto 0);
-	signal bypass_dec_ctrl_b	: std_logic_vector(1 downto 0);
 	signal bypass_alu_ctrl_b	: std_logic_vector(1 downto 0);
 
-	signal bypass_dec_ctrl_mem	: std_logic_vector(1 downto 0);
 	signal bypass_alu_ctrl_mem	: std_logic_vector(1 downto 0);
 	signal bypass_lk_ctrl_mem	: std_logic_vector(1 downto 0);
 	signal bypass_ch_ctrl_mem	: std_logic_vector(1 downto 0);
@@ -125,15 +111,12 @@ architecture Structure of control_unit is
 begin
 	
 	-- Bypasses control
-	bypasses_ctrl_a(1 downto 0)	<= bypass_dec_ctrl_a;
-	bypasses_ctrl_a(3 downto 2)	<= bypass_alu_ctrl_a;
-	bypasses_ctrl_b(1 downto 0)	<= bypass_dec_ctrl_b;
-	bypasses_ctrl_b(3 downto 2)	<= bypass_alu_ctrl_b;
+	bypasses_ctrl_a(1 downto 0)	<= bypass_alu_ctrl_a;
+	bypasses_ctrl_b(1 downto 0)	<= bypass_alu_ctrl_b;
 
-	bypass_ctrl_mem(1 downto 0)	<= bypass_dec_ctrl_mem;
-	bypass_ctrl_mem(3 downto 2)	<= bypass_alu_ctrl_mem;
-	bypass_ctrl_mem(5 downto 4)	<= bypass_lk_ctrl_mem;
-	bypass_ctrl_mem(7 downto 6)	<= bypass_ch_ctrl_mem;
+	bypasses_ctrl_mem(1 downto 0)	<= bypass_alu_ctrl_mem;
+	bypasses_ctrl_mem(3 downto 2)	<= bypass_lk_ctrl_mem;
+	bypasses_ctrl_mem(5 downto 4)	<= bypass_ch_ctrl_mem;
 
 	-- check_bypass
 	-- reg(dec).ra = regf(fopwb).rdest
@@ -141,25 +124,17 @@ begin
 	-- reg(dec) op uses a
 
 
-	bypass_dec_ctrl_a <=	"11" when check_bypass(DECODE, FOPWB, 0) else
-				"10" when check_bypass(DECODE, MEMWB, 0) else
-				"01" when check_bypass(DECODE, ALU, 0) else
-				"00";
+--	bypass_alu_ctrl_a <=	
+--				"11" when check_bypass(ALU, FOPWB, 0) else
+--				"10" when check_bypass(ALU, MEMWB, 0) else
+--				"01" when check_bypass(ALU, ALU, 0) else
+--				"00"; -- no bypass
 
-	bypass_alu_ctrl_a <=	"11" when check_bypass(ALU, FOPWB, 0) else
-				"10" when check_bypass(ALU, MEMWB, 0) else
-				"01" when check_bypass(ALU, ALU, 0) else
-				"00";
-
-	bypass_dec_ctrl_b <=	"11" when check_bypass(DECODE, FOPWB, 1) else
-				"10" when check_bypass(DECODE, MEMWB, 1) else
-				"01" when check_bypass(DECODE, ALU, 1) else
-				"00";
-
-	bypass_alu_ctrl_b <=	"11" when check_bypass(ALU, FOPWB, 1) else
-				"10" when check_bypass(ALU, MEMWB, 1) else
-				"01" when check_bypass(ALU, ALU, 1) else
-				"00";
+--	bypass_alu_ctrl_b <=	
+--				"11" when check_bypass(ALU, FOPWB, 1) else
+--				"10" when check_bypass(ALU, MEMWB, 1) else
+--				"01" when check_bypass(ALU, ALU, 1) else
+--				"00"; -- no bypass
 
 
 	ir <= decode_ir;
