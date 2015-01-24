@@ -34,15 +34,24 @@ architecture comportament of memory is
 	procedure Load_FitxerDadesMemoria(	signal data_word	:inout RAM_MEMORY;
 										signal imem			:in std_logic) is
 		
-		file romfile   :text open read_mode is "test.rom";
+		file romfilep   :text open read_mode is "prog.rom";
+		file romfiled   :text open read_mode is "data.rom";
 		variable lbuf  :line;
 		variable i     :integer := 49152;  -- X"C000" ==> 49152 adreca inicial S.O.
 		variable fdata :std_logic_vector (7 downto 0);
 	begin
 		if (imem = '1') then
-			while not endfile(romfile) loop
+			while not endfile(romfilep) loop
 				-- read data from input file
-				readline(romfile, lbuf);
+				readline(romfilep, lbuf);
+				read(lbuf, fdata);
+				data_word(i) <= fdata;
+				i := i+1;
+			end loop;
+		else 
+			while not endfile(romfiled) loop
+				-- read data from input file
+				readline(romfiled, lbuf);
 				read(lbuf, fdata);
 				data_word(i) <= fdata;
 				i := i+1;
