@@ -6,9 +6,8 @@ use ieee.std_logic_unsigned.all;
 entity stage_cache is
 	port (
 		clock		: in	std_logic;
-		reset		: in std_logic;
+		boot		: in 	std_logic;
 		stall		: in	std_logic;
-		nop			: in	std_logic;
 		
 		-- flipflop inputs
 		ff_addr_mem	: in	std_logic_vector(15 downto 0);
@@ -66,7 +65,7 @@ architecture Structure of stage_cache is
 begin
 	cache : cache_d(
 		clk					=> clock,
-		boot				=> reset,
+		boot				=> boot,
 		r_w					=> mode_r_w,
 		cache_mem			=> mode_c_m,
 		b_w					=> size_b_w,
@@ -91,9 +90,7 @@ begin
 	process (clk)
 	begin
 		if (rising_edge(clk)) then
-			if stall = '1' then
-			elsif nop = '1' then
-			else
+			if not (stall = '1') then
 				addr_mem 	<= ff_addr_mem;
 				mem_data_lk	<= ff_mem_data;
 			end if;

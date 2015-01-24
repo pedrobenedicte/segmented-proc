@@ -33,13 +33,28 @@ entity datapath is
 		alu_w				: out	std_logic_vector(15 downto 0);
 		alu_z				: out	std_logic;
 		
-		-- Cache
+		-- Data Lookup & TLB
+		-- TLB exception
+		dlookup_exception	: out	std_logic;
+		-- Lookup
+		dlookup				: in	std_logic;
+		dlookup_load_store	: in	std_logic;
+		dlookup_hit_miss	: out	std_logic;
+		-- Write back
+		dlookup_write_back	: out	std_logic;
+		dlookup_wb_tag		: out	std_logic_vector(9 downto 0);
+		
+		-- Data Cache
+		-- Cache mode
+		dcache_mode_r_w		: in	std_logic;
+		dcache_mode_c_m		: in	std_logic;
+		-- Byte or word
+		dcache_size_b_w		: in	std_logic;
 		
 		-- Memories
 		-- Instructions memory
 		imem_addr			: out	std_logic_vector(15 downto 0);
 		imem_rd_data		: in	std_logic_vector(63 downto 0);
-		
 		-- Data memory
 		dmem_we				: out	std_logic;
 		dmem_addr			: out	std_logic_vector(15 downto 0);
@@ -145,30 +160,42 @@ architecture Structure OF datapath is
 	
 	component stage_lookup is
 		port (
-			clk				: in	std_logic;
-			boot			: in 	std_logic;
-			stall			: in	std_logic;
+			clock				: in	std_logic;
+			boot				: in 	std_logic;
+			stall				: in	std_logic;
 			
 			-- flipflop inputs
-			ff_addr_mem		: in	std_logic_vector(15 downto 0);
-			ff_mem_data		: in	std_logic_vector(15 downto 0);
+			ff_addr_mem			: in	std_logic_vector(15 downto 0);
+			ff_mem_data			: in	std_logic_vector(15 downto 0);
 			
 			-- Bypasses control and sources
-			bp_ctrl_mem		: in	std_logic_vector(1 downto 0);
-			bp_data_mwb		: in	std_logic_vector(15 downto 0);
-			bp_data_fwb		: in	std_logic_vector(15 downto 0);
+			bp_ctrl_mem			: in	std_logic_vector(1 downto 0);
+			bp_data_mwb			: in	std_logic_vector(15 downto 0);
+			bp_data_fwb			: in	std_logic_vector(15 downto 0);
 			
-			aluwb			: out	std_logic_vector(15 downto 0);
-			addr_mem		: out	std_logic_vector(15 downto 0);
-			mem_data		: out	std_logic_vector(15 downto 0)
+			-- TLB exception
+			lookup_exception	: out	std_logic;
+			
+			-- Lookup
+			lookup				: in	std_logic;
+			load_store			: in	std_logic;
+			hit_miss			: out	std_logic;
+			
+			-- Write back
+			write_back			: out	std_logic;
+			wb_tag				: out	std_logic_vector(9 downto 0);
+			
+			aluwb				: out	std_logic_vector(15 downto 0);
+			addr_mem			: out	std_logic_vector(15 downto 0);
+			mem_data			: out	std_logic_vector(15 downto 0)
 		);
 	end component;
 	
 	component stage_cache is
 		port (
-			clk			: in	std_logic;
+			clock		: in	std_logic;
+			boot		: in 	std_logic;
 			stall		: in	std_logic;
-			nop			: in	std_logic;
 			
 			-- flipflop inputs
 			ff_addr_mem	: in	std_logic_vector(15 downto 0);
@@ -181,9 +208,16 @@ architecture Structure OF datapath is
 			
 			-- Data memory
 			dmem_we		: out	std_logic;
-			dmem_addr	: out	std_logic_vector(15 downto 0);
+			dmem_addr	: out	std_logic_vector(12 downto 0);
 			dmem_wr_data: out	std_logic_vector(63 downto 0);
 			dmem_rd_data: in	std_logic_vector(63 downto 0);
+			
+			-- Cache mode
+			mode_r_w	: in	std_logic;
+			mode_c_m	: in	std_logic;
+			
+			-- Byte or word
+			size_b_w	: in	std_logic;
 			
 			load_data	: out	std_logic_vector(15 downto 0)
 		);
@@ -389,6 +423,18 @@ begin
 		bp_data_mwb	=> memwb_data,
 		bp_data_fwb	=> fopwb_data,
 		
+		-- TLB exception
+		lookup_exception=> dlookup_exception,
+
+		-- Lookup
+		lookup		=> dlookup,
+		load_store	=> dlookup_load_store,
+		hit_miss	=> dlookup_hit_miss,
+
+		-- Write back
+		write_back	=> dlookup_write_back,
+		wb_tag		=> dlookup_wb_tag,
+		
 		aluwb		=> aluwb_data,
 		addr_mem	=> l2c_addr_mem,
 		mem_data	=> l2c_mem_data
@@ -414,6 +460,13 @@ begin
 		dmem_addr	=> dmem_addr,
 		dmem_wr_data=> dmem_wr_data,
 		dmem_rd_data=> dmem_rd_data,
+		
+		-- Cache mode
+		mode_r_w	=> dcache_mode_r_w,
+		mode_c_m	=> dcache_mode_c_m,
+
+		-- Byte or word
+		size_b_w	=> dcache_size_b_w,
 		
 		load_data	=> c2mwb_load_data
 	);

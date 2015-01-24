@@ -6,7 +6,7 @@ use ieee.std_logic_unsigned.all;
 entity stage_lookup is
 	port (
 		clock				: in	std_logic;
-		reset				: in 	std_logic;
+		boot				: in 	std_logic;
 		stall				: in	std_logic;
 		
 		-- flipflop inputs
@@ -77,7 +77,7 @@ begin
 
 	tags : tags_d (
 			clk				=> clock,
-			boot			=> reset,
+			boot			=> boot,
 			we				=> lookup,
 			read_write		=> load_store,
 			add_logical		=> ff_addr_mem,

@@ -33,7 +33,23 @@ entity control_unit is
 		alu_w				: in	std_logic_vector(15 downto 0);
 		alu_z				: in	std_logic;
 		
-		-- Cache
+		-- Data Lookup & TLB
+		-- TLB exception
+		dlookup_exception	: in	std_logic;
+		-- Lookup
+		dlookup				: out	std_logic;
+		dlookup_load_store	: out	std_logic;
+		dlookup_hit_miss	: in	std_logic;
+		-- Write back
+		dlookup_write_back	: in	std_logic;
+		dlookup_wb_tag		: in	std_logic_vector(9 downto 0);
+		
+		-- Data Cache
+		-- Cache mode
+		dcache_mode_r_w		: out	std_logic;
+		dcache_mode_c_m		: out	std_logic;
+		-- Byte or word
+		dcache_size_b_w		: out	std_logic;
 		
 		-- Bypasses control
 		bypasses_ctrl_a		: out	std_logic_vector(3 downto 0); -- A, F1
