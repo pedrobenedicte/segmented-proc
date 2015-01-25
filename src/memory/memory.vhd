@@ -37,7 +37,7 @@ architecture comportament of memory is
 		file romfilep   :text open read_mode is "prog.rom";
 		file romfiled   :text open read_mode is "data.rom";
 		variable lbuf  :line;
-		variable i     :integer := 49152;  -- X"C000" ==> 49152 adreca inicial S.O.
+		variable i     :integer := 0;  -- X"C000" ==> 49152 adreca inicial S.O.
 		variable fdata :std_logic_vector (7 downto 0);
 	begin
 		if (imem = '1') then
