@@ -71,7 +71,7 @@ begin
 		r_w					=> mode_r_w,
 		cache_mem			=> mode_c_m,
 		b_w					=> size_b_w,
-		add_physical		=> ff_addr_mem,
+		add_physical		=> addr_mem,
 		memory_r_w			=> nread,
 		memory_address		=> dmem_addr(15 downto 3),
 		memory_in			=> dmem_rd_data,
