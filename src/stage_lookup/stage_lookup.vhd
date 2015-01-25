@@ -79,7 +79,7 @@ begin
 			boot			=> boot,
 			we				=> lookup,
 			read_write		=> load_store,
-			add_logical		=> ff_addr_mem,
+			add_logical		=> addr_mem_logical,
 			add_physical	=> address_tlb,
 			hit_miss		=> hit_miss,
 			wb				=> write_back,
@@ -91,7 +91,7 @@ begin
 			clk				=> clk,
 			boot			=> boot,
 			we				=> lookup,
-			add_logical		=> ff_addr_mem,
+			add_logical		=> addr_mem_logical,
 			hit_miss		=> tlb_hit,
 			add_physical	=> address_tlb
 		);
