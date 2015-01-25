@@ -39,9 +39,9 @@ architecture Structure of soc is
 		);
 	end component;
 	
-	signal clk			: std_logic;
-	signal reset_proc	: std_logic;
-	signal reset_ram	: std_logic;
+	signal clk			: std_logic := '0';
+	signal reset_proc	: std_logic := '0';
+	signal reset_ram	: std_logic := '0';
 	
 	signal imem_we		: std_logic;
 	signal imem_addr	: std_logic_vector(15 downto 0);
