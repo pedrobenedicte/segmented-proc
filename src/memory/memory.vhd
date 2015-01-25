@@ -61,13 +61,13 @@ architecture comportament of memory is
 	
 begin
    
-	addr1	<= addr(15 downto 3) + "001";
-	addr2	<= addr(15 downto 3) + "010";
-	addr3	<= addr(15 downto 3) + "011";
-	addr4	<= addr(15 downto 3) + "100";
-	addr5	<= addr(15 downto 3) + "101";
-	addr6	<= addr(15 downto 3) + "110";
-	addr7	<= addr(15 downto 3) + "111";
+	addr1	<= addr(15 downto 3)&"001";
+	addr2	<= addr(15 downto 3)&"010";
+	addr3	<= addr(15 downto 3)&"011";
+	addr4	<= addr(15 downto 3)&"100";
+	addr5	<= addr(15 downto 3)&"101";
+	addr6	<= addr(15 downto 3)&"110";
+	addr7	<= addr(15 downto 3)&"111";
 	
 	rd_data	<= 	mem(conv_integer(addr7)) & mem(conv_integer(addr6)) & mem(conv_integer(addr5)) & mem(conv_integer(addr4)) &
 				mem(conv_integer(addr3)) & mem(conv_integer(addr2)) & mem(conv_integer(addr1)) & mem(conv_integer(addr));
