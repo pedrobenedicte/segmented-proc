@@ -373,6 +373,8 @@ begin
 	-- Fetch signals assignation
 	fetch_pc	<=	rstages(FETCH).pc;
 	
+	fetch_cache_mem <= '1';
+	
 	process(clk)
 	begin
 		if (rising_edge(clk)) then

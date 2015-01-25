@@ -68,7 +68,6 @@ begin
 	offset		<= add_physical(2 downto 0);
 	
 	i_index		<= to_integer(unsigned(index));
-	i_offset	<= to_integer(unsigned(offset));
 	
 	memory_r_w <= '0' when ((cache_mem = '0') and (r_w = '0'))
 				else '1';
@@ -81,37 +80,37 @@ begin
 			else
 				if (r_w = '1') then
 					if (cache_mem = '1') then			-- load from cache
-						data_out(7 downto 0) <= cache(i_index)(i_offset);
+						data_out(7 downto 0)	<= cache(i_index)(to_integer(unsigned(offset)));
 						if (b_w = '0') then
-							data_out(15 downto 8) <= cache(i_index)(i_offset+1);
+							data_out(15 downto 8) 	<= cache(i_index)(to_integer(unsigned(offset+"001")));
 						end if;
-					else										-- load from memory
+					else								-- load from memory
 						memory_address	<= page & offset;
-						cache(i_index)(i_offset)		<= memory_in(63 downto 56);
-						cache(i_index)(i_offset+1)	<= memory_in(55 downto 48);
-						cache(i_index)(i_offset+2)	<= memory_in(47 downto 40);
-						cache(i_index)(i_offset+3)	<= memory_in(39 downto 32);
-						cache(i_index)(i_offset+4)	<= memory_in(31 downto 24);
-						cache(i_index)(i_offset+5)	<= memory_in(23 downto 16);
-						cache(i_index)(i_offset+6)	<= memory_in(15 downto 8);
-						cache(i_index)(i_offset+7)	<= memory_in(7 downto 0);
+						cache(i_index)(to_integer(unsigned(offset)))		<= memory_in(63 downto 56);
+						cache(i_index)(to_integer(unsigned(offset+"001")))	<= memory_in(55 downto 48);
+						cache(i_index)(to_integer(unsigned(offset+"010")))	<= memory_in(47 downto 40);
+						cache(i_index)(to_integer(unsigned(offset+"011")))	<= memory_in(39 downto 32);
+						cache(i_index)(to_integer(unsigned(offset+"100")))	<= memory_in(31 downto 24);
+						cache(i_index)(to_integer(unsigned(offset+"101")))	<= memory_in(23 downto 16);
+						cache(i_index)(to_integer(unsigned(offset+"110")))	<= memory_in(15 downto 8);
+						cache(i_index)(to_integer(unsigned(offset+"111")))	<= memory_in(7 downto 0);
 					end if;
 				else
 					if (cache_mem = '1') then			-- store to cache
-						cache(i_index)(i_offset) <= data_in(7 downto 0);
+						cache(i_index)(to_integer(unsigned(offset))) 	<= data_in(7 downto 0);
 						if (b_w = '0') then
-							cache(i_index)(i_offset+1) <= data_in(15 downto 8);
+							cache(i_index)(to_integer(unsigned(offset+"001"))) 	<= data_in(15 downto 8);
 						end if;
-					else										-- store to memory
+					else								-- store to memory
 						memory_address	<= page & offset;
-						memory_out(63 downto 56)	<= cache(i_index)(i_offset);
-						memory_out(55 downto 48)	<= cache(i_index)(i_offset+1);
-						memory_out(47 downto 40)	<= cache(i_index)(i_offset+2);
-						memory_out(39 downto 32)	<= cache(i_index)(i_offset+3);
-						memory_out(31 downto 24)	<= cache(i_index)(i_offset+4);
-						memory_out(23 downto 16)	<= cache(i_index)(i_offset+5);
-						memory_out(15 downto 8)		<= cache(i_index)(i_offset+6);
-						memory_out(7 downto 0)		<= cache(i_index)(i_offset+7);
+						memory_out(63 downto 56)	<= cache(i_index)(to_integer(unsigned(offset)));
+						memory_out(55 downto 48)	<= cache(i_index)(to_integer(unsigned(offset+"001")));
+						memory_out(47 downto 40)	<= cache(i_index)(to_integer(unsigned(offset+"010")));
+						memory_out(39 downto 32)	<= cache(i_index)(to_integer(unsigned(offset+"011")));
+						memory_out(31 downto 24)	<= cache(i_index)(to_integer(unsigned(offset+"100")));
+						memory_out(23 downto 16)	<= cache(i_index)(to_integer(unsigned(offset+"101")));
+						memory_out(15 downto 8)		<= cache(i_index)(to_integer(unsigned(offset+"110")));
+						memory_out(7 downto 0)		<= cache(i_index)(to_integer(unsigned(offset+"111")));
 					end if;
 				end if;
 			end if;
