@@ -63,6 +63,7 @@ architecture Structure of stage_lookup is
 		);
 	end component;
 	
+	constant zero			: std_logic_vector(15 downto 0) := "0000000000000000";
 	constant debug			: std_logic_vector(15 downto 0) := "1010101010101010";
 	
 	signal addr_mem_logical	: std_logic_vector(15 downto 0);
@@ -107,10 +108,16 @@ begin
 	process (clk)
 	begin
 		if (rising_edge(clk)) then
-			if not (stall = '1') then
-				aluwb			<= ff_addr_mem;
-				addr_mem_logical<= ff_addr_mem;
-				mem_data_inside	<= ff_mem_data;
+			if boot = '1' then
+				aluwb			<= zero;
+				addr_mem_logical<= zero;
+				mem_data_inside	<= zero;
+			else
+				if not (stall = '1') then
+					aluwb			<= ff_addr_mem;
+					addr_mem_logical<= ff_addr_mem;
+					mem_data_inside	<= ff_mem_data;
+				end if;
 			end if;
 		end if;
 	end process;
