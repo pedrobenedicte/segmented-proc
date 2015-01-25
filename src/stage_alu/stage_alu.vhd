@@ -13,8 +13,9 @@ entity stage_alu is
 		ff_a		: in	std_logic_vector(15 downto 0);
 		ff_b		: in	std_logic_vector(15 downto 0);
 		ff_mem_data	: in	std_logic_vector(15 downto 0);
-		ff_opclass	: in 	std_logic_vector(2 downto 0);
-		ff_opcode	: in	std_logic_vector(1 downto 0);
+		
+		opclass		: in 	std_logic_vector(2 downto 0);
+		opcode		: in	std_logic_vector(1 downto 0);
 		
 		-- Bypasses control and sources
 		bp_ctrl_a	: in	std_logic_vector(1 downto 0);
@@ -51,8 +52,6 @@ architecture Structure of stage_alu is
 	signal a				: std_logic_vector(15 downto 0);
 	signal b				: std_logic_vector(15 downto 0);
 	signal mem_data_inside	: std_logic_vector(15 downto 0);
-	signal opclass			: std_logic_vector(2 downto 0);
-	signal opcode			: std_logic_vector(1 downto 0);
 	
 begin
 
@@ -95,15 +94,11 @@ begin
 				a 				<= zero;
 				b				<= zero;
 				mem_data_inside	<= zero;
-				opclass			<= "000";
-				opcode			<= "00";
 			else
 				if not (stall = '1') then
 					a 				<= ff_a;
 					b				<= ff_b;
 					mem_data_inside	<= ff_mem_data;
-					opclass			<= ff_opclass;
-					opcode			<= ff_opcode;
 				end if;
 			end if;
 		end if;
