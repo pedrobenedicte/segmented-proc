@@ -24,7 +24,6 @@ architecture Structure of cache_i is
 	signal index	: std_logic_vector(2 downto 0);
 	signal offset	: std_logic_vector(2 downto 0);
 	
-	signal i_page	: integer;
 	signal i_index	: integer;
 	signal i_offset	: integer;
 	
@@ -63,7 +62,6 @@ begin
 	index		<= add_physical(5 downto 3);
 	offset	<= add_physical(2 downto 0);
 	
-	i_page		<= to_integer(unsigned(page));
 	i_index		<= to_integer(unsigned(index));
 	i_offset	<= to_integer(unsigned(offset));
 
