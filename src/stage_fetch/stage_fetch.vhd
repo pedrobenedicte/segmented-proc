@@ -68,12 +68,8 @@ architecture Structure of stage_fetch is
 	end component;
 	
 	signal cache_add		: std_logic_vector(15 downto 0);
-	signal addess_tlb		: std_logic_vector(15 downto 0);
-	signal addess_tag		: std_logic_vector(15 downto 0);
+	signal address_tlb		: std_logic_vector(15 downto 0);
 	signal tlb_hit			: std_logic;
-	signal tag_hit			: std_logic;
-	signal u_a_tlb			: integer;
-	signal u_a_tag			: integer;
 
 begin
 	tags : tags_i
@@ -82,8 +78,8 @@ begin
 			boot			=> boot,
 			we				=> cache_mem,
 			add_logical		=> pc,
-			add_physical	=> addess_tag,
-			hit_miss		=> tag_hit
+			add_physical	=> address_tlb,
+			hit_miss		=> hit_miss
 		);
 		
 	tlb : tlb_i
@@ -93,7 +89,7 @@ begin
 			we				=> cache_mem,
 			add_logical		=> pc,
 			hit_miss		=> tlb_hit,
-			add_physical	=> addess_tlb
+			add_physical	=> address_tlb
 		);
 		
 	cache : cache_i
@@ -109,15 +105,10 @@ begin
 	
 	fetch_exception <= not tlb_hit;
 	
-	real_address <= addess_tlb;
+	real_address <= address_tlb;
 	
 	imem_addr(2 downto 0) <= "000";
 	
-	u_a_tlb <= to_integer(unsigned(addess_tlb));
-	u_a_tag <= to_integer(unsigned(addess_tag));
-
-	hit_miss	<= '1' when ((tag_hit = '1') and (u_a_tlb = u_a_tag))
-				else '0';
 	cache_add	<= pc when (cache_mem = '0')
 				else memory_pc;
 	

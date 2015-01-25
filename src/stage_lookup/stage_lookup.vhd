@@ -68,17 +68,10 @@ architecture Structure of stage_lookup is
 	signal addr_mem_logical	: std_logic_vector(15 downto 0);
 	signal mem_data_inside	: std_logic_vector(15 downto 0);
 	signal tlb_hit			: std_logic;
-	signal tag_hit			: std_logic;
-	signal addess_tlb		: std_logic_vector(15 downto 0);
-	signal addess_tag		: std_logic_vector(15 downto 0);
-	
-	signal u_a_tlb			: integer;
-	signal u_a_tag			: integer;
+	signal address_tlb		: std_logic_vector(15 downto 0);
+		
 begin
 	lookup_exception <= not tlb_hit;
-
-	u_a_tlb <= to_integer(unsigned(addess_tlb));
-	u_a_tag <= to_integer(unsigned(addess_tag));
 	
 	tags : tags_d 
 		port map (
@@ -87,8 +80,8 @@ begin
 			we				=> lookup,
 			read_write		=> load_store,
 			add_logical		=> ff_addr_mem,
-			add_physical	=> addess_tag,
-			hit_miss		=> tag_hit,
+			add_physical	=> address_tlb,
+			hit_miss		=> hit_miss,
 			wb				=> write_back,
 			wb_tag			=> wb_tag
 		);
@@ -100,7 +93,7 @@ begin
 			we				=> lookup,
 			add_logical		=> ff_addr_mem,
 			hit_miss		=> tlb_hit,
-			add_physical	=> addess_tlb
+			add_physical	=> address_tlb
 		);
 	
 	with bp_ctrl_mem select
@@ -109,9 +102,7 @@ begin
 						bp_data_fwb		when "11",
 						debug			when others;
 
-	hit_miss <= '1' when ((tag_hit = '1') and (u_a_tlb = u_a_tag))
-				else '0';
-	addr_mem <= addess_tlb;
+	addr_mem <= address_tlb;
 	
 	process (clk)
 	begin
