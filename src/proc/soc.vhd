@@ -97,7 +97,7 @@ begin
 
 	clk <= not clk after 10 ns;
 	reset_ram <= '1' after 15 ns, '0' after 50 ns;
-	reset_proc <= '1' after 25 ns, '0' after 320 ns;
+	reset_proc <= '1' after 25 ns, '0' after 100 ns;
 
 	
 end Structure;

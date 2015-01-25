@@ -81,10 +81,12 @@ architecture Structure of control_unit is
 		opcode	: std_logic_vector(1 downto 0);
 	end record;
 	
-	type reg_stages is array (11 downto 0) of reg_stages_entry;
+	type reg_stages is array (11 downto 2) of reg_stages_entry;
 	
 	signal rstages				: reg_stages;
+	signal rstage_decode		: reg_stages_entry;
 	
+	signal regPC_fetch			: std_logic_vector(15 downto 0);
 	signal newPC				: std_logic_vector(15 downto 0);
 	signal stalls				: std_logic_vector(11 downto 0) := "000000000000";
 
@@ -135,7 +137,7 @@ architecture Structure of control_unit is
 	signal ir		: std_logic_vector(15 downto 0);
 	
 	procedure clear_pipeline ( signal rstages	: inout	reg_stages) is
-		variable i	: integer := DECODE;
+		variable i	: integer := ALU;
 	begin
 		while i < FOPWB loop
 			rstages(i).int 		<= '0';
@@ -164,20 +166,35 @@ architecture Structure of control_unit is
 		rstages(dest).opcode 	<= rstages(src).opcode;
 	end procedure;
 	
-	procedure do_pipeline_step ( signal rstages	: inout	reg_stages) is
-		variable i	: integer := DECODE;
-		variable j	: integer := ALU;
+	procedure move_decode_info(	signal rstages		: inout	reg_stages;
+								signal rstage_decode: inout	reg_stages_entry;
+								variable dest 		: in	integer) is
 	begin
+		rstages(dest).int 		<= rstage_decode.int;
+		rstages(dest).exc 		<= rstage_decode.exc;
+		rstages(dest).pc 		<= rstage_decode.pc;
+		rstages(dest).addr_d 	<= rstage_decode.addr_d;
+		rstages(dest).addr_a 	<= rstage_decode.addr_a;
+		rstages(dest).addr_b 	<= rstage_decode.addr_b;
+		rstages(dest).opclass 	<= rstage_decode.opclass;
+		rstages(dest).opcode 	<= rstage_decode.opcode;
+	end procedure;
+	
+	procedure do_pipeline_step (signal rstages			: inout	reg_stages;
+								signal rstage_decode	: inout	reg_stages_entry) is
+		variable i	: integer := ALU;
+		variable j	: integer := LOOKUP;
+	begin
+		move_decode_info(rstages, rstage_decode, i);
 		while i < MEMWB loop
 			move_stages_info(rstages, i, j);
 			i := i+1;
 			j := j+1;
 		end loop;
-		i := DECODE;
-		j := FOP1;
-		move_stages_info(rstages, i, j);
+		
 		i := FOP1;
 		j := FOP2;
+		move_decode_info(rstages, rstage_decode, i);
 		while i < FOPWB loop
 			move_stages_info(rstages, i, j);
 			i := i+1;
@@ -296,20 +313,14 @@ begin
 		addr_b 	<= ir(2 downto 0);
 		
 		addr_d	<=	ir(5 downto 3)	when ir(15 downto 13) = MEM and	ir(12 downto 12) = "0" else 
-					ir(8 downto 6)	when ir(15 downto 13) = ART or 	ir(15 downto 13) = FOP;
+					ir(8 downto 6)	when ir(15 downto 13) = ART or 	ir(15 downto 13) = FOP else "000";
 		
 		with to_integer(unsigned(ir(15 downto 13))) select
 			immed	<=	ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10 DOWNTO 6) 	when MEM,
 						ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10 DOWNTO 3) 						when BNZ,
 						debug	when others;
 		
-		rstages(DECODE).int		<= '0';
-		rstages(DECODE).exc		<= '0';
-		rstages(DECODE).addr_d	<= addr_d;
-		rstages(DECODE).addr_a	<= addr_a;
-		rstages(DECODE).addr_b	<= addr_b;
-		rstages(DECODE).opclass	<= opclass;
-		rstages(DECODE).opcode	<= opcode;
+
 
 	
 	-- Bypasses control 
@@ -366,12 +377,12 @@ begin
 
 
 	with ctrl_pc select
-		newPC	<=	EXC_VECTOR									when "10",
-					rstages(FETCH).pc+alu_w(13 downto 0)&"00"	when "01",
-					rstages(FETCH).pc+4							when others;
+		newPC	<=	EXC_VECTOR							when "10",
+					regPC_fetch+alu_w(14 downto 0)&"0"	when "01",
+					regPC_fetch+2						when others;
 
 	-- Fetch signals assignation
-	fetch_pc	<=	rstages(FETCH).pc;
+	fetch_pc	<=	regPC_fetch;
 	
 	fetch_cache_mem <= '1';
 	
@@ -379,14 +390,35 @@ begin
 	begin
 		if (rising_edge(clk)) then
 			if boot = '1' then
-				rstages(FETCH).pc	<= zero;
-				--clear_pipeline(rstages);
+				regPC_fetch	<= zero;
+				rstage_decode.pc <= zero;
+				clear_pipeline(rstages);
 			else
-				rstages(FETCH).pc	<= newPC;
-				rstages(DECODE).pc	<= rstages(FETCH).pc;
-				do_pipeline_step(rstages);
+				
+				regPC_fetch			<= newPC;
+				rstage_decode.pc	<= regPC_fetch;
+				do_pipeline_step(rstages, rstage_decode);
+			end if;
+		elsif (falling_edge(clk)) then
+			if boot = '1' then
+				rstage_decode.int		<= '0';
+				rstage_decode.exc		<= '0';
+				rstage_decode.addr_d	<= "000";
+				rstage_decode.addr_a	<= "000";
+				rstage_decode.addr_b	<= "000";
+				rstage_decode.opclass	<= "000";
+				rstage_decode.opcode	<= "00";
+			else 
+				rstage_decode.int		<= '0';
+				rstage_decode.exc		<= '0';
+				rstage_decode.addr_d	<= addr_d;
+				rstage_decode.addr_a	<= addr_a;
+				rstage_decode.addr_b	<= addr_b;
+				rstage_decode.opclass	<= opclass;
+				rstage_decode.opcode	<= opcode;
 			end if;
 		end if;
+		
 	end process;
 
 

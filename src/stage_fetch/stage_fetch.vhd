@@ -109,7 +109,7 @@ begin
 	
 	imem_addr(2 downto 0) <= "000";
 	
-	cache_add	<= pc when (cache_mem = '0')
-				else memory_pc;
+	cache_add	<= 	pc when (cache_mem = '1') else 
+					memory_pc;
 	
 end Structure;

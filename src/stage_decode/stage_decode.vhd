@@ -42,6 +42,7 @@ architecture Structure of stage_decode is
 	component regfile is
 		port (
 			clk		: in	std_logic;
+			boot	: in	std_logic;
 			wrd		: in	std_logic;
 			d 		: in 	std_logic_vector(15 downto 0);
 			addr_a	: in	std_logic_vector(2 downto 0);
@@ -65,6 +66,7 @@ begin
 	br : regfile
 	port map (
 		clk 	=> clk,
+		boot	=> boot,
 		wrd 	=> wrd,
 		d 		=> selected_d,
 		addr_a 	=> addr_a,
