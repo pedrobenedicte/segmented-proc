@@ -6,6 +6,7 @@ use ieee.std_logic_unsigned.all;
 entity stage_f5 is
 	port (
 		clk			: in	std_logic;
+		boot		: in	std_logic;
 		stall		: in	std_logic;
 		
 		-- flipflop inputs
@@ -18,13 +19,19 @@ end stage_f5;
 
 architecture Structure of stage_f5 is
 
+	constant zero		: std_logic_vector(15 downto 0) := "0000000000000000";
+
 begin
 
 	process (clk)
 	begin
 		if (rising_edge(clk)) then
-			if not (stall = '1') then
-				fop_data 	<= ff_fop_data;
+			if boot = '1' then
+				fop_data	<= zero;
+			else
+				if not (stall = '1') then
+					fop_data 	<= ff_fop_data;
+				end if;
 			end if;
 		end if;
 	end process;

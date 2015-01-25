@@ -126,6 +126,7 @@ architecture Structure OF datapath is
 	component stage_decode is
 		port (
 			clk			: in	std_logic;
+			boot		: in	std_logic;
 			stall		: in	std_logic;
 			
 			-- flipflop inputs
@@ -158,6 +159,7 @@ architecture Structure OF datapath is
 	component stage_alu is
 		port (
 			clk			: in	std_logic;
+			boot		: in	std_logic;
 			stall		: in	std_logic;
 			
 			-- flipflop inputs
@@ -249,6 +251,7 @@ architecture Structure OF datapath is
 	component stage_wb is
 		port (
 			clk			: in	std_logic;
+			boot		: in	std_logic;
 			stall		: in	std_logic;
 			
 			-- flipflop inputs
@@ -261,6 +264,7 @@ architecture Structure OF datapath is
 	component stage_f1 is
 		port (
 			clk			: in	std_logic;
+			boot		: in	std_logic;
 			stall		: in	std_logic;
 			
 			-- flipflop inputs
@@ -281,6 +285,7 @@ architecture Structure OF datapath is
 	component stage_f2 is
 		port (
 			clk			: in	std_logic;
+			boot		: in	std_logic;
 			stall		: in	std_logic;
 			
 			-- flipflop inputs
@@ -293,6 +298,7 @@ architecture Structure OF datapath is
 	component stage_f3 is
 		port (
 			clk			: in	std_logic;
+			boot		: in	std_logic;
 			stall		: in	std_logic;
 			
 			-- flipflop inputs
@@ -305,6 +311,7 @@ architecture Structure OF datapath is
 	component stage_f4 is
 		port (
 			clk			: in	std_logic;
+			boot		: in	std_logic;
 			stall		: in	std_logic;
 			
 			-- flipflop inputs
@@ -317,6 +324,7 @@ architecture Structure OF datapath is
 	component stage_f5 is
 		port (
 			clk			: in	std_logic;
+			boot		: in	std_logic;
 			stall		: in	std_logic;
 			
 			-- flipflop inputs
@@ -329,6 +337,7 @@ architecture Structure OF datapath is
 	component stage_fwb is
 		port (
 			clk			: in	std_logic;
+			boot		: in	std_logic;
 			stall		: in	std_logic;
 			
 			-- flipflop inputs
@@ -393,6 +402,7 @@ begin
 	dec	: stage_decode
 	port map (
 		clk			=> clk,
+		boot		=> boot,
 		stall		=> stall_vector(DECODE),
 		
 		-- flipflop inputs
@@ -423,6 +433,7 @@ begin
 	alu0 : stage_alu
 	port map (
 		clk			=> clk,
+		boot		=> boot,
 		stall		=> stall_vector(ALU),
 		
 		-- flipflop inputs
@@ -513,6 +524,7 @@ begin
 	wb	: stage_wb
 	port map (
 		clk			=> clk,
+		boot		=> boot,
 		stall		=> stall_vector(MEMWB),
 		
 		-- flipflop inputs
@@ -525,6 +537,7 @@ begin
 	f1	: stage_f1
 	port map (
 		clk			=> clk,
+		boot		=> boot,
 		stall		=> stall_vector(FOP1),
 		
 		-- flipflop inputs
@@ -544,6 +557,7 @@ begin
 	f2	: stage_f2
 	port map (
 		clk			=> clk,
+		boot		=> boot,
 		stall		=> stall_vector(FOP2),
 		
 		-- flipflop inputs
@@ -555,6 +569,7 @@ begin
 	f3	: stage_f3
 	port map (
 		clk			=> clk,
+		boot		=> boot,
 		stall		=> stall_vector(FOP3),
 		
 		-- flipflop inputs
@@ -566,6 +581,7 @@ begin
 	f4	: stage_f4
 	port map (
 		clk			=> clk,
+		boot		=> boot,
 		stall		=> stall_vector(FOP4),
 		
 		-- flipflop inputs
@@ -577,6 +593,7 @@ begin
 	f5	: stage_f5
 	port map (
 		clk			=> clk,
+		boot		=> boot,
 		stall		=> stall_vector(FOP5),
 		
 		-- flipflop inputs
@@ -588,6 +605,7 @@ begin
 	fwb	: stage_fwb
 	port map (
 		clk			=> clk,
+		boot		=> boot,
 		stall		=> stall_vector(FOPWB),
 		
 		-- flipflop inputs

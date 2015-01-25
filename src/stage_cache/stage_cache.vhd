@@ -56,6 +56,7 @@ architecture Structure of stage_cache is
 		);
 	end component;
 	
+	constant zero		: std_logic_vector(15 downto 0) := "0000000000000000";
 	constant debug		: std_logic_vector(15 downto 0) := "1010101010101010";
 	signal addr_mem		: std_logic_vector(15 downto 0);
 	signal mem_data_lk	: std_logic_vector(15 downto 0);
@@ -92,9 +93,14 @@ begin
 	process (clk)
 	begin
 		if (rising_edge(clk)) then
-			if not (stall = '1') then
-				addr_mem 	<= ff_addr_mem;
-				mem_data_lk	<= ff_mem_data;
+			if boot = '1' then
+				addr_mem 	<= zero;
+				mem_data_lk	<= zero;
+			else
+				if not (stall = '1') then
+					addr_mem 	<= ff_addr_mem;
+					mem_data_lk	<= ff_mem_data;
+				end if;
 			end if;
 		end if;
 	end process;

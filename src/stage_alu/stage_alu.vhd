@@ -6,6 +6,7 @@ use ieee.std_logic_unsigned.all;
 entity stage_alu is
 	port (
 		clk			: in	std_logic;
+		boot		: in	std_logic;
 		stall		: in	std_logic;
 		
 		-- flipflop inputs
@@ -43,6 +44,7 @@ architecture Structure of stage_alu is
 	);
 	end component;
 
+	constant zero			: std_logic_vector(15 downto 0) := "0000000000000000";
 	signal selected_a		: std_logic_vector(15 downto 0);
 	signal selected_b		: std_logic_vector(15 downto 0);
 	
@@ -89,12 +91,20 @@ begin
 	process (clk)
 	begin
 		if (rising_edge(clk)) then
-			if not (stall = '1') then
-				a 				<= ff_a;
-				b				<= ff_b;
-				mem_data_inside	<= ff_mem_data;
-				opclass			<= ff_opclass;
-				opcode			<= ff_opcode;
+			if boot = '1' then
+				a 				<= zero;
+				b				<= zero;
+				mem_data_inside	<= zero;
+				opclass			<= "000";
+				opcode			<= "00";
+			else
+				if not (stall = '1') then
+					a 				<= ff_a;
+					b				<= ff_b;
+					mem_data_inside	<= ff_mem_data;
+					opclass			<= ff_opclass;
+					opcode			<= ff_opcode;
+				end if;
 			end if;
 		end if;
 	end process;

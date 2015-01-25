@@ -6,6 +6,7 @@ use ieee.std_logic_unsigned.all;
 entity stage_decode is
 	port (
 		clk			: in	std_logic;
+		boot		: in	std_logic;
 		stall		: in	std_logic;
 		
 		-- flipflop inputs
@@ -51,7 +52,8 @@ architecture Structure of stage_decode is
 		);
 	end component;
 	
-	constant debug : std_logic_vector(15 downto 0) := "1010101010101010";
+	constant zero			: std_logic_vector(15 downto 0) := "0000000000000000";
+	constant debug 			: std_logic_vector(15 downto 0) := "1010101010101010";
 
 	signal rf_a				:	std_logic_vector(15 downto 0);
 	signal rf_b				:	std_logic_vector(15 downto 0);
@@ -96,8 +98,12 @@ begin
 	process (clk)
 	begin
 		if (rising_edge(clk)) then
-			if not (stall = '1') then
-				ir 	<= ff_ir;
+			if boot = '1' then
+				ir 	<= zero;
+			else
+				if not (stall = '1') then
+					ir 	<= ff_ir;
+				end if;
 			end if;
 		end if;
 	end process;
