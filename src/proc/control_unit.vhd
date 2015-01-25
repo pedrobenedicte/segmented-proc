@@ -377,7 +377,7 @@ begin
 	begin
 		if (rising_edge(clk)) then
 			if boot = '1' then
-				rstages(FETCH).pc	<= "1100000000000000";
+				rstages(FETCH).pc	<= zero;
 				--clear_pipeline(rstages);
 			else
 				rstages(FETCH).pc	<= newPC;
