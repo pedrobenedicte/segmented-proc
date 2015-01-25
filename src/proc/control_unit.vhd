@@ -84,9 +84,9 @@ architecture Structure of control_unit is
 	type reg_stages is array (11 downto 0) of reg_stages_entry;
 	
 	signal rstages				: reg_stages;
-	signal decode_tmp_rstage	: reg_stages_entry;
 	
-	signal newPC	: std_logic_vector(15 downto 0);
+	signal newPC				: std_logic_vector(15 downto 0);
+	signal stalls				: std_logic_vector(11 downto 0) := "000000000000";
 
 	signal bypass_alu_ctrl_a	: std_logic_vector(1 downto 0);
 	signal bypass_alu_ctrl_b	: std_logic_vector(1 downto 0);
@@ -114,6 +114,7 @@ architecture Structure of control_unit is
 		constant FOPWB	: integer	:= 11;
 		
 		constant EXC_VECTOR	: std_logic_vector(15 downto 0) := "0001000000000000";
+		constant zero		: std_logic_vector(15 downto 0) := "0000000000000000";
 		constant debug 		: std_logic_vector(15 downto 0) := "1010101010101010";
 	
 	-- Instruction decode signlas
@@ -133,20 +134,21 @@ architecture Structure of control_unit is
 	signal ctrl_pc	: std_logic_vector(1 downto 0) := "00";
 	signal ir		: std_logic_vector(15 downto 0);
 	
-	
-	procedure feed_decode_stage(	signal rstages	: inout	reg_stages;
-									signal tmp		: in reg_stages_entry) is
+	procedure clear_pipeline ( signal rstages	: inout	reg_stages) is
+		variable i	: integer := DECODE;
 	begin
-		rstages(DECODE).int 	<= tmp.int;
-		rstages(DECODE).exc 	<= tmp.exc;
-		rstages(DECODE).pc 		<= tmp.pc;
-		rstages(DECODE).addr_d 	<= tmp.addr_d;
-		rstages(DECODE).addr_a 	<= tmp.addr_a;
-		rstages(DECODE).addr_b 	<= tmp.addr_b;
-		rstages(DECODE).opclass <= tmp.opclass;
-		rstages(DECODE).opcode 	<= tmp.opcode;
+		while i < FOPWB loop
+			rstages(i).int 		<= '0';
+			rstages(i).exc 		<= '0';
+			rstages(i).pc 		<= zero;
+			rstages(i).addr_d 	<= "000";
+			rstages(i).addr_a 	<= "000";
+			rstages(i).addr_b 	<= "000";
+			rstages(i).opclass	<= "000";
+			rstages(i).opcode 	<= "00";
+			i := i+1;
+		end loop;
 	end procedure;
-	
 	
 	procedure move_stages_info(	signal rstages	: inout	reg_stages;
 								variable src 	: in	integer;
@@ -261,6 +263,7 @@ architecture Structure of control_unit is
 begin
 	
 	-- FEED STAGES
+	stall_vector		<= stalls;
 	-- Decode
 	decode_awb_addr_d	<= rstages(LOOKUP).addr_d;
 	decode_mwb_addr_d	<= rstages(MEMWB).addr_d;
@@ -300,14 +303,13 @@ begin
 						ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10 DOWNTO 3) 						when BNZ,
 						debug	when others;
 		
-		decode_tmp_rstage.int		<= '0';
-		decode_tmp_rstage.exc		<= '0';
-		decode_tmp_rstage.pc		<= rstages(DECODE).pc;
-		decode_tmp_rstage.addr_d	<= addr_d;
-		decode_tmp_rstage.addr_a	<= addr_a;
-		decode_tmp_rstage.addr_b	<= addr_b;
-		decode_tmp_rstage.opclass	<= opclass;
-		decode_tmp_rstage.opcode	<= opcode;
+		rstages(DECODE).int		<= '0';
+		rstages(DECODE).exc		<= '0';
+		rstages(DECODE).addr_d	<= addr_d;
+		rstages(DECODE).addr_a	<= addr_a;
+		rstages(DECODE).addr_b	<= addr_b;
+		rstages(DECODE).opclass	<= opclass;
+		rstages(DECODE).opcode	<= opcode;
 
 	
 	-- Bypasses control 
@@ -365,7 +367,7 @@ begin
 
 	with ctrl_pc select
 		newPC	<=	EXC_VECTOR									when "10",
-					rstages(FETCH).pc+alu_w(15 downto 2)&"00"	when "01",
+					rstages(FETCH).pc+alu_w(13 downto 0)&"00"	when "01",
 					rstages(FETCH).pc+4							when others;
 
 	-- Fetch signals assignation
@@ -376,18 +378,11 @@ begin
 		if (rising_edge(clk)) then
 			if boot = '1' then
 				rstages(FETCH).pc	<= "1100000000000000";
-				-- inizialitation
+				--clear_pipeline(rstages);
 			else
 				rstages(FETCH).pc	<= newPC;
-				
+				rstages(DECODE).pc	<= rstages(FETCH).pc;
 				do_pipeline_step(rstages);
-				
-			end if;
-		elsif (falling_edge(clk)) then
-			if not (boot = '1') then
-				--if not (to_integer(unsigned(rstages(decode).opclass)) = NOP) then
-				feed_decode_stage(rstages, decode_tmp_rstage);
-				--end if;
 			end if;
 		end if;
 	end process;

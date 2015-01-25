@@ -87,7 +87,8 @@ begin
 	
 	with ctrl_immed select
 		a	<=	rf_a	when '0',
-				immed	when '1';
+				immed	when '1',
+				rf_a	when others;
 	
 	b			<=	rf_b;
 	mem_data	<=	rf_a;

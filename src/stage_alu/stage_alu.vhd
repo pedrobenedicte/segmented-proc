@@ -69,19 +69,22 @@ begin
 		selected_a	<=	a			when "00",
 						bp_data_awb	when "01",
 						bp_data_mwb	when "10",
-						bp_data_fwb	when "11";
+						bp_data_fwb	when "11",
+						a			when others;
 	
 	with bp_ctrl_b select
 		selected_b	<=	b			when "00",
 						bp_data_awb	when "01",
 						bp_data_mwb	when "10",
-						bp_data_fwb	when "11";
+						bp_data_fwb	when "11",
+						b			when others;
 	
 	with bp_ctrl_mem select
 		mem_data	<=	mem_data_inside	when "00",
 						bp_data_awb		when "01",
 						bp_data_mwb		when "10",
-						bp_data_fwb		when "11";
+						bp_data_fwb		when "11",
+						mem_data_inside	when others;
 	
 	process (clk)
 	begin
