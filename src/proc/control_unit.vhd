@@ -259,6 +259,30 @@ architecture Structure of control_unit is
 	end function check_bypass; 
 	
 begin
+	
+	-- FEED STAGES
+	-- Decode
+	decode_awb_addr_d	<= rstages(LOOKUP).addr_d;
+	decode_mwb_addr_d	<= rstages(MEMWB).addr_d;
+	decode_fwb_addr_d	<= rstages(FOPWB).addr_d;
+
+	decode_addr_a		<= addr_a;
+	decode_addr_b		<= addr_b;
+	
+	--decode_wrd			: out	std_logic; -- TODO
+	
+	decode_ctrl_d		<= 	"00"	when to_integer(unsigned(rstages(LOOKUP).opclass)) = ALU else-- ADD
+							"01"	when to_integer(unsigned(rstages(MEMWB).opclass)) = MEM and
+										 to_integer(unsigned(rstages(MEMWB).opcode(1 downto 1))) = 0 else -- LOAD
+							"10"	when to_integer(unsigned(rstages(FOPWB).opclass)) = FOP else -- FOP
+							"11";	-- Nothing to write
+	
+	decode_ctrl_immed	<= 	'1'	when to_integer(unsigned(opclass)) = BNZ or to_integer(unsigned(opclass)) = MEM else '0';
+	decode_immed		<= 	immed;
+	
+	-- Alu
+	alu_opclass			<= rstages(ALU).opclass;
+	alu_opcode			<= rstages(ALU).opcode;
 
 	-- Instruction decode
 		ir <= decode_ir;
@@ -278,7 +302,7 @@ begin
 		
 		decode_tmp_rstage.int		<= '0';
 		decode_tmp_rstage.exc		<= '0';
-		decode_tmp_rstage.pc		<= rstages(FETCH).pc; -- TODO revisit
+		decode_tmp_rstage.pc		<= rstages(DECODE).pc;
 		decode_tmp_rstage.addr_d	<= addr_d;
 		decode_tmp_rstage.addr_a	<= addr_a;
 		decode_tmp_rstage.addr_b	<= addr_b;
@@ -355,8 +379,15 @@ begin
 				-- inizialitation
 			else
 				rstages(FETCH).pc	<= newPC;
-				feed_decode_stage(rstages, decode_tmp_rstage);
+				
 				do_pipeline_step(rstages);
+				
+			end if;
+		elsif (falling_edge(clk)) then
+			if not (boot = '1') then
+				--if not (to_integer(unsigned(rstages(decode).opclass)) = NOP) then
+				feed_decode_stage(rstages, decode_tmp_rstage);
+				--end if;
 			end if;
 		end if;
 	end process;
