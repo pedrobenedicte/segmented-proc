@@ -133,7 +133,7 @@ architecture Structure of control_unit is
 		signal addr_a	: std_logic_vector(2 downto 0);
 		signal addr_b	: std_logic_vector(2 downto 0);
 	
-	signal ctrl_pc	: std_logic_vector(1 downto 0) := "00";
+	signal exc		: std_logic := '0';
 	signal ir		: std_logic_vector(15 downto 0);
 	
 	procedure clear_pipeline ( signal rstages	: inout	reg_stages) is
@@ -289,13 +289,16 @@ begin
 	decode_addr_a		<= addr_a;
 	decode_addr_b		<= addr_b;
 	
-	--decode_wrd			: out	std_logic; -- TODO
+	decode_wrd			<= '1'	when 	to_integer(unsigned(rstages(LOOKUP).opclass)) = ALU or				-- ADD
+										(to_integer(unsigned(rstages(MEMWB).opclass)) = MEM and
+										 to_integer(unsigned(rstages(MEMWB).opcode(1 downto 1))) = 0) or 	-- LOAD
+										to_integer(unsigned(rstages(FOPWB).opclass)) = FOP	else '0';		-- FOP
 	
-	decode_ctrl_d		<= 	"00"	when to_integer(unsigned(rstages(LOOKUP).opclass)) = ALU else-- ADD
+	decode_ctrl_d		<= 	"00"	when to_integer(unsigned(rstages(LOOKUP).opclass)) = ALU else			-- ADD
 							"01"	when to_integer(unsigned(rstages(MEMWB).opclass)) = MEM and
-										 to_integer(unsigned(rstages(MEMWB).opcode(1 downto 1))) = 0 else -- LOAD
-							"10"	when to_integer(unsigned(rstages(FOPWB).opclass)) = FOP else -- FOP
-							"11";	-- Nothing to write
+										 to_integer(unsigned(rstages(MEMWB).opcode(1 downto 1))) = 0 else 	-- LOAD
+							"10"	when to_integer(unsigned(rstages(FOPWB).opclass)) = FOP else 			-- FOP
+							"11";																			-- Nothing to write
 	
 	decode_ctrl_immed	<= 	'1'	when to_integer(unsigned(opclass)) = BNZ or to_integer(unsigned(opclass)) = MEM else '0';
 	decode_immed		<= 	immed;
@@ -375,11 +378,9 @@ begin
 					"10" when check_bypass(rstages, CACHE, MEMWB, 2) else
 					"00"; -- no bypass
 
-
-	with ctrl_pc select
-		newPC	<=	EXC_VECTOR							when "10",
-					regPC_fetch+alu_w(14 downto 0)&"0"	when "01",
-					regPC_fetch+2						when others;
+	newPC	<=	rstages(ALU).pc+alu_w	when (to_integer(unsigned(rstages(ALU).opclass)) = BNZ) and alu_z = '1' else
+				EXC_VECTOR				when exc = '1' else
+				regPC_fetch+2;
 
 	-- Fetch signals assignation
 	fetch_pc	<=	regPC_fetch;

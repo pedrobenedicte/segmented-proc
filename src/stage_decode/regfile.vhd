@@ -26,7 +26,7 @@ BEGIN
 	
 	PROCESS (clk)
 	BEGIN
-		IF (rising_edge(clk)) THEN
+		IF (falling_edge(clk)) THEN
 			IF boot = '1' THEN
 				br(0) <= "0000000000000001";
 				br(1) <= "0000000000000010";

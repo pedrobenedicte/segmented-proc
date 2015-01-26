@@ -166,8 +166,9 @@ architecture Structure OF datapath is
 			ff_a		: in	std_logic_vector(15 downto 0);
 			ff_b		: in	std_logic_vector(15 downto 0);
 			ff_mem_data	: in	std_logic_vector(15 downto 0);
-			ff_opclass	: in 	std_logic_vector(2 downto 0);
-			ff_opcode	: in	std_logic_vector(1 downto 0);
+			
+			opclass		: in 	std_logic_vector(2 downto 0);
+			opcode		: in	std_logic_vector(1 downto 0);
 			
 			-- Bypasses control and sources
 			bp_ctrl_a	: in	std_logic_vector(1 downto 0);
@@ -440,8 +441,9 @@ begin
 		ff_a		=> d2a_a,
 		ff_b		=> d2a_b,
 		ff_mem_data	=> d2a_mem_data,
-		ff_opclass	=> alu_opclass,
-		ff_opcode	=> alu_opcode,
+		
+		opclass		=> alu_opclass,
+		opcode		=> alu_opcode,
 		
 		-- Bypasses control and sources
 		bp_ctrl_a	=> bypasses_ctrl_a(1 downto 0),
