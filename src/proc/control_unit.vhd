@@ -330,12 +330,12 @@ begin
 	stall_struct_hrz(DECODE)<= stall_alu or stall_mem;
 	
 	stall_alu	<= '1'	when	(to_integer(unsigned(rstage_decode.opclass)) = ALU and
-								to_integer(unsigned(rstages(ALU).opclass)) = MEM) or
+								to_integer(unsigned(rstages(LOOKUP).opclass)) = MEM) or
 								(to_integer(unsigned(rstage_decode.opclass)) = ALU and
 								to_integer(unsigned(rstages(FOP4).opclass)) = FOP)	else '0';
 	
 	stall_mem	<= '1'	when	to_integer(unsigned(rstage_decode.opclass)) = MEM and
-								to_integer(unsigned(rstages(FOP4).opclass)) = FOP	else '0';
+								to_integer(unsigned(rstages(FOP3).opclass)) = FOP	else '0';
 	
 	
 	-- FEED STAGES
