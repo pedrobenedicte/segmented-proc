@@ -378,8 +378,8 @@ begin
 					"10" when check_bypass(rstages, CACHE, MEMWB, 2) else
 					"00"; -- no bypass
 
-	newPC	<=	regPC_fetch+alu_w	when (to_integer(unsigned(rstages(ALU).opclass)) = BNZ) and alu_z = '1' else
-				EXC_VECTOR			when exc = '1' else
+	newPC	<=	rstages(ALU).pc+alu_w	when (to_integer(unsigned(rstages(ALU).opclass)) = BNZ) and alu_z = '1' else
+				EXC_VECTOR				when exc = '1' else
 				regPC_fetch+2;
 
 	-- Fetch signals assignation
