@@ -70,6 +70,22 @@ end control_unit;
 
 architecture Structure of control_unit is
 
+	component decode_control_logic is
+		port (
+			ir		: in	std_logic_vector(15 downto 0);
+			
+			opclass	: out	std_logic_vector(2 downto 0);
+			opcode	: out	std_logic_vector(1 downto 0);
+			
+			-- 8 for bnz, 5 for mem. SXT
+			immed	: out	std_logic_vector(15 downto 0);
+			addr_d	: out	std_logic_vector(2 downto 0);
+			addr_a	: out	std_logic_vector(2 downto 0);
+			addr_b	: out	std_logic_vector(2 downto 0)
+		);
+	end component;
+
+
 	type reg_stages_entry is record
 		int		: std_logic;
 		exc		: std_logic;
@@ -134,7 +150,6 @@ architecture Structure of control_unit is
 		signal addr_b	: std_logic_vector(2 downto 0);
 	
 	signal exc		: std_logic := '0';
-	signal ir		: std_logic_vector(15 downto 0);
 	
 	procedure clear_pipeline ( signal rstages	: inout	reg_stages) is
 		variable i	: integer := ALU;
@@ -278,6 +293,20 @@ architecture Structure of control_unit is
 	end function check_bypass; 
 	
 begin
+
+	dcl : decode_control_logic
+	port map (
+		ir		=> decode_ir,
+		
+		opclass	=> opclass,
+		opcode	=> opcode,
+		
+		-- 8 for bnz, 5 for mem. SXT
+		immed	=> immed,
+		addr_d	=> addr_d,
+		addr_a	=> addr_a,
+		addr_b	=> addr_b
+	);
 	
 	-- FEED STAGES
 	stall_vector		<= stalls;
@@ -306,25 +335,6 @@ begin
 	-- Alu
 	alu_opclass			<= rstages(ALU).opclass;
 	alu_opcode			<= rstages(ALU).opcode;
-
-	-- Instruction decode
-		ir <= decode_ir;
-		
-		opclass	<= ir(15 downto 13);
-		opcode	<= ir(12 downto 11);
-		addr_a 	<= ir(5 downto 3);
-		addr_b 	<= ir(2 downto 0);
-		
-		addr_d	<=	ir(5 downto 3)	when ir(15 downto 13) = MEM and	ir(12 downto 12) = "0" else 
-					ir(8 downto 6)	when ir(15 downto 13) = ART or 	ir(15 downto 13) = FOP else "000";
-		
-		with to_integer(unsigned(ir(15 downto 13))) select
-			immed	<=	ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10 DOWNTO 6) 	when MEM,
-						ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10 DOWNTO 3) 						when BNZ,
-						debug	when others;
-		
-
-
 	
 	-- Bypasses control 
 		bypasses_ctrl_a(1 downto 0)		<= bypass_alu_ctrl_a;
@@ -425,4 +435,3 @@ begin
 
 
 end Structure;
-
