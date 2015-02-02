@@ -3,6 +3,9 @@ use ieee.std_logic_1164.all;
 use IEEE.numeric_std.all;
 use ieee.std_logic_unsigned.all;
 
+library work;
+use work.proc_resources.all;
+
 entity stage_alu is
 	port (
 		clk			: in	std_logic;
@@ -45,7 +48,6 @@ architecture Structure of stage_alu is
 	);
 	end component;
 
-	constant zero			: std_logic_vector(15 downto 0) := "0000000000000000";
 	signal selected_a		: std_logic_vector(15 downto 0);
 	signal selected_b		: std_logic_vector(15 downto 0);
 	

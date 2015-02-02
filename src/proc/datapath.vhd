@@ -1,7 +1,10 @@
-LIBRARY ieee;
+library ieee;
 use ieee.std_logic_1164.all;
-use IEEE.numeric_std.all;
+use ieee.numeric_std.all;
 use ieee.std_logic_unsigned.all;
+
+library work;
+use work.proc_resources.all;
 
 entity datapath is 
 	port (
@@ -80,26 +83,14 @@ end datapath;
 
 architecture Structure OF datapath is
 
-	-- Defines
-		constant FETCH	: integer	:= 0;
-		constant DECODE	: integer	:= 1;
-		constant ALU	: integer	:= 2;
-		constant LOOKUP	: integer	:= 3;
-		constant CACHE	: integer	:= 4;
-		constant MEMWB	: integer	:= 5;
-		
-		constant FOP1	: integer	:= 6;
-		constant FOP2	: integer	:= 7;
-		constant FOP3	: integer	:= 8;
-		constant FOP4	: integer	:= 9;
-		constant FOP5	: integer	:= 10;
-		constant FOPWB	: integer	:= 11;
-
 	component stage_fetch is
 		port (
 			clk				: in	std_logic;
 			boot			: in	std_logic;
 			stall			: in	std_logic;
+			
+			-- flipflop inputs
+			ff_pc			: in	std_logic_vector(15 downto 0);
 			
 			imem_addr		: out	std_logic_vector(15 downto 0);
 			imem_rd_data	: in	std_logic_vector(63 downto 0);
@@ -117,8 +108,6 @@ architecture Structure OF datapath is
 			real_address	: out	std_logic_vector(15 downto 0);
 			memory_pc		: in	std_logic_vector(15 downto 0);
 			
-			-- no flipflop, pc comes from a flipflop
-			pc				: in	std_logic_vector(15 downto 0);
 			ir				: out	std_logic_vector(15 downto 0)
 		);
 	end component;
@@ -372,12 +361,15 @@ architecture Structure OF datapath is
 	signal fopwb_data		: std_logic_vector(15 downto 0);
 	
 begin
-
+	
 	fch	: stage_fetch
 	port map (
 		clk			=> clk,
 		boot		=> boot,
 		stall		=> stall_vector(FETCH),
+		
+		-- flipflop inputs
+		ff_pc		=> fetch_pc,
 		
 		imem_addr	=> imem_addr,
 		imem_rd_data=> imem_rd_data,
@@ -389,14 +381,12 @@ begin
 		cache_mem	=> fetch_cache_mem,
 		
 		-- Hit or miss
-		real_address=> fetch_real_address,
 		hit_miss	=> fetch_hit_miss,
 		
 		-- Physical addres obtained in previous miss
+		real_address=> fetch_real_address,
 		memory_pc	=> fetch_memory_pc,
 		
-		-- no flipflop, pc comes from a flipflop
-		pc			=> fetch_pc,
 		ir			=> f2d_ir
 	);
 	

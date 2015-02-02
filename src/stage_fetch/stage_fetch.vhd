@@ -1,7 +1,10 @@
-LIBRARY ieee;
+library ieee;
 use ieee.std_logic_1164.all;
-use IEEE.numeric_std.all;
+use ieee.numeric_std.all;
 use ieee.std_logic_unsigned.all;
+
+library work;
+use work.proc_resources.all;
 
 entity stage_fetch is
 	port (
@@ -9,9 +12,12 @@ entity stage_fetch is
 		boot			: in	std_logic;
 		stall			: in	std_logic;
 		
+		-- flipflop inputs
+		ff_pc			: in	std_logic_vector(15 downto 0);
+		
 		imem_addr		: out	std_logic_vector(15 downto 0);
 		imem_rd_data	: in	std_logic_vector(63 downto 0);
-	
+		
 		-- TLB exception
 		fetch_exception	: out	std_logic;
 		
@@ -25,8 +31,6 @@ entity stage_fetch is
 		real_address	: out	std_logic_vector(15 downto 0);
 		memory_pc		: in	std_logic_vector(15 downto 0);
 		
-		-- no flipflop, pc comes from a flipflop
-		pc				: in	std_logic_vector(15 downto 0);
 		ir				: out	std_logic_vector(15 downto 0)
 	);
 end stage_fetch;
@@ -67,6 +71,7 @@ architecture Structure of stage_fetch is
 		);
 	end component;
 	
+	signal pc				: std_logic_vector(15 downto 0);
 	signal cache_add		: std_logic_vector(15 downto 0);
 	signal address_tlb		: std_logic_vector(15 downto 0);
 	signal tlb_hit			: std_logic;
@@ -111,5 +116,18 @@ begin
 	
 	cache_add	<= 	pc when (cache_mem = '1') else 
 					memory_pc;
+	
+	process (clk)
+	begin
+		if (rising_edge(clk)) then
+			if boot = '1' then
+				pc 	<= zero;
+			else
+				if not (stall = '1') then
+					pc 	<= ff_pc;
+				end if;
+			end if;
+		end if;
+	end process;
 	
 end Structure;

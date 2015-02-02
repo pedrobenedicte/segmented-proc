@@ -3,6 +3,9 @@ use ieee.std_logic_1164.all;
 use IEEE.numeric_std.all;
 use ieee.std_logic_unsigned.all;
 
+library work;
+use work.proc_resources.all;
+
 entity stage_f1 is
 	port (
 		clk			: in	std_logic;
@@ -27,7 +30,6 @@ end stage_f1;
 
 architecture Structure of stage_f1 is
 
-	constant zero		: std_logic_vector(15 downto 0) := "0000000000000000";
 	signal a			: std_logic_vector(15 downto 0);
 	signal b			: std_logic_vector(15 downto 0);
 	

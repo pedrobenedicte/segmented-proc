@@ -3,6 +3,9 @@ use ieee.std_logic_1164.all;
 use IEEE.numeric_std.all;
 use ieee.std_logic_unsigned.all;
 
+library work;
+use work.proc_resources.all;
+
 entity stage_decode is
 	port (
 		clk			: in	std_logic;
@@ -53,9 +56,6 @@ architecture Structure of stage_decode is
 		);
 	end component;
 	
-	constant zero			: std_logic_vector(15 downto 0) := "0000000000000000";
-	constant debug 			: std_logic_vector(15 downto 0) := "1010101010101010";
-
 	signal rf_a				:	std_logic_vector(15 downto 0);
 	signal rf_b				:	std_logic_vector(15 downto 0);
 	signal selected_d		:	std_logic_vector(15 downto 0);
