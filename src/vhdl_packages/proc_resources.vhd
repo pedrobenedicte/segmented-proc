@@ -44,12 +44,78 @@ package proc_resources is
 	constant FOP		: integer := 4;
 
 	-- Functions headers
-
+	procedure clear_pipeline  (	signal rstages			: out	reg_stages);
+	procedure move_stages_info(	signal rstage_dest		: out	reg_stages_entry;
+								signal rstage_src		: in	reg_stages_entry);
+	procedure move_decode_info(	signal rstage_dest		: out	reg_stages_entry;
+								signal rstage_decode	: in	reg_stages_entry);
+	procedure do_pipeline_step(	signal rstages			: inout	reg_stages;
+								signal rstage_decode	: in	reg_stages_entry);
 
 end proc_resources;
 
 package body proc_resources is
 
 	-- Functions behaviour
+	
+	procedure clear_pipeline ( signal rstages	: out	reg_stages) is
+		variable i	: integer := ALU;
+	begin
+		while i < FOPWB loop
+			rstages(i).int 		<= '0';
+			rstages(i).exc 		<= '0';
+			rstages(i).pc 		<= zero;
+			rstages(i).addr_d 	<= "000";
+			rstages(i).addr_a 	<= "000";
+			rstages(i).addr_b 	<= "000";
+			rstages(i).opclass	<= "000";
+			rstages(i).opcode 	<= "00";
+			i := i+1;
+		end loop;
+	end procedure;
+	
+	procedure move_stages_info(	signal rstage_dest	: out	reg_stages_entry;
+								signal rstage_src	: in	reg_stages_entry) is
+	begin
+		rstage_dest.int 	<= rstage_src.int;
+		rstage_dest.exc 	<= rstage_src.exc;
+		rstage_dest.pc 		<= rstage_src.pc;
+		rstage_dest.addr_d 	<= rstage_src.addr_d;
+		rstage_dest.addr_a 	<= rstage_src.addr_a;
+		rstage_dest.addr_b 	<= rstage_src.addr_b;
+		rstage_dest.opclass <= rstage_src.opclass;
+		rstage_dest.opcode 	<= rstage_src.opcode;
+	end procedure;
+	
+	procedure move_decode_info(	signal rstage_dest	: out	reg_stages_entry;
+								signal rstage_decode: in	reg_stages_entry) is
+	begin
+		rstage_dest.int 	<= rstage_decode.int;
+		rstage_dest.exc 	<= rstage_decode.exc;
+		rstage_dest.pc 		<= rstage_decode.pc;
+		rstage_dest.addr_d 	<= rstage_decode.addr_d;
+		rstage_dest.addr_a 	<= rstage_decode.addr_a;
+		rstage_dest.addr_b 	<= rstage_decode.addr_b;
+		rstage_dest.opclass <= rstage_decode.opclass;
+		rstage_dest.opcode 	<= rstage_decode.opcode;
+	end procedure;
+	
+	procedure do_pipeline_step (signal rstages			: inout	reg_stages;
+								signal rstage_decode	: in	reg_stages_entry) is
+	begin
+		
+		move_decode_info(rstages(ALU), rstage_decode);
+		move_stages_info(rstages(LOOKUP), rstages(ALU));
+		move_stages_info(rstages(CACHE), rstages(LOOKUP));
+		move_stages_info(rstages(MEMWB), rstages(CACHE));
+		
+		move_decode_info(rstages(FOP1), rstage_decode);
+		move_stages_info(rstages(FOP2), rstages(FOP1));
+		move_stages_info(rstages(FOP3), rstages(FOP2));
+		move_stages_info(rstages(FOP4), rstages(FOP3));
+		move_stages_info(rstages(FOP5), rstages(FOP4));
+		move_stages_info(rstages(FOPWB), rstages(FOP5));
+
+	end procedure;
 
 end proc_resources;

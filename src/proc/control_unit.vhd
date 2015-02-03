@@ -99,12 +99,10 @@ architecture Structure of control_unit is
 		);
 	end component;
 
-
 	signal rstages				: reg_stages;
 	signal rstage_decode		: reg_stages_entry;
 	
 	signal regPC_fetch			: std_logic_vector(15 downto 0);
-	signal regPC_decode			: std_logic_vector(15 downto 0);
 	signal newPC				: std_logic_vector(15 downto 0);
 	signal stalls				: std_logic_vector(11 downto 0) := "000000000000";
 	
@@ -112,78 +110,12 @@ architecture Structure of control_unit is
 	
 	signal opclass	: std_logic_vector(2 downto 0);
 	signal opcode	: std_logic_vector(1 downto 0);
-	signal immed	: std_logic_vector(15 downto 0); -- 8 for bnz, 5 for mem
+	signal immed	: std_logic_vector(15 downto 0);
 	signal addr_d	: std_logic_vector(2 downto 0);
 	signal addr_a	: std_logic_vector(2 downto 0);
 	signal addr_b	: std_logic_vector(2 downto 0);
 	
 	signal exc		: std_logic := '0';
-	
-	procedure clear_pipeline ( signal rstages	: inout	reg_stages) is
-		variable i	: integer := ALU;
-	begin
-		while i < FOPWB loop
-			rstages(i).int 		<= '0';
-			rstages(i).exc 		<= '0';
-			rstages(i).pc 		<= zero;
-			rstages(i).addr_d 	<= "000";
-			rstages(i).addr_a 	<= "000";
-			rstages(i).addr_b 	<= "000";
-			rstages(i).opclass	<= "000";
-			rstages(i).opcode 	<= "00";
-			i := i+1;
-		end loop;
-	end procedure;
-	
-	procedure move_stages_info(	signal rstages	: inout	reg_stages;
-								variable src 	: in	integer;
-								variable dest 	: in	integer) is
-	begin
-		rstages(dest).int 		<= rstages(src).int;
-		rstages(dest).exc 		<= rstages(src).exc;
-		rstages(dest).pc 		<= rstages(src).pc;
-		rstages(dest).addr_d 	<= rstages(src).addr_d;
-		rstages(dest).addr_a 	<= rstages(src).addr_a;
-		rstages(dest).addr_b 	<= rstages(src).addr_b;
-		rstages(dest).opclass 	<= rstages(src).opclass;
-		rstages(dest).opcode 	<= rstages(src).opcode;
-	end procedure;
-	
-	procedure move_decode_info(	signal rstages		: inout	reg_stages;
-								signal rstage_decode: inout	reg_stages_entry;
-								variable dest 		: in	integer) is
-	begin
-		rstages(dest).int 		<= rstage_decode.int;
-		rstages(dest).exc 		<= rstage_decode.exc;
-		rstages(dest).pc 		<= rstage_decode.pc;
-		rstages(dest).addr_d 	<= rstage_decode.addr_d;
-		rstages(dest).addr_a 	<= rstage_decode.addr_a;
-		rstages(dest).addr_b 	<= rstage_decode.addr_b;
-		rstages(dest).opclass 	<= rstage_decode.opclass;
-		rstages(dest).opcode 	<= rstage_decode.opcode;
-	end procedure;
-	
-	procedure do_pipeline_step (signal rstages			: inout	reg_stages;
-								signal rstage_decode	: inout	reg_stages_entry) is
-		variable i	: integer := ALU;
-		variable j	: integer := LOOKUP;
-	begin
-		move_decode_info(rstages, rstage_decode, i);
-		while i < MEMWB loop
-			move_stages_info(rstages, i, j);
-			i := i+1;
-			j := j+1;
-		end loop;
-		
-		i := FOP1;
-		j := FOP2;
-		move_decode_info(rstages, rstage_decode, i);
-		while i < FOPWB loop
-			move_stages_info(rstages, i, j);
-			i := i+1;
-			j := j+1;
-		end loop;
-	end procedure;
 	
 begin
 
@@ -248,7 +180,6 @@ begin
 	
 	rstage_decode.int		<= '0';
 	rstage_decode.exc		<= '0';
-	rstage_decode.pc 		<= regPC_decode;
 	rstage_decode.addr_d	<= addr_d;
 	rstage_decode.addr_a	<= addr_a;
 	rstage_decode.addr_b	<= addr_b;
@@ -259,17 +190,15 @@ begin
 	begin
 		if (rising_edge(clk)) then
 			if boot = '1' then
-				regPC_fetch		<= zero;
-				regPC_decode 	<= zero;
+				regPC_fetch			<= zero;
+				rstage_decode.pc 	<= zero;
 				clear_pipeline(rstages);
 			else
-				regPC_fetch		<= newPC;
-				regPC_decode	<= regPC_fetch;
+				regPC_fetch			<= newPC;
+				rstage_decode.pc 	<= regPC_fetch;
 				do_pipeline_step(rstages, rstage_decode);
 			end if;
 		end if;
 	end process;
-
-
-
+	
 end Structure;
