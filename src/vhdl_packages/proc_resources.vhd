@@ -1,7 +1,6 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use ieee.std_logic_arith.all;
 
 package proc_resources is
 
@@ -115,12 +114,26 @@ package body proc_resources is
 	begin
 		
 		-- 	INFO:		 dest				src				stall_dest		clear_dest
-		move_stages_info(rstages(ALU), 		rstage_decode, 	stalls(ALU), 	clears(ALU));
+		
+		-- Decode feeds a the instruction or a NOP to the two pipelines
+		if to_integer(unsigned(rstage_decode.opclass)) = FOP then 
+			clear_stage(rstages(ALU));
+			move_stages_info(rstages(FOP1),		rstage_decode, 	stalls(FOP1), 	clears(FOP1));
+		else
+			move_stages_info(rstages(ALU), 		rstage_decode, 	stalls(ALU), 	clears(ALU));
+			clear_stage(rstages(FOP1));
+		end if;
+		
+		-- alu/mem pipeline
 		move_stages_info(rstages(LOOKUP),	rstages(ALU), 	stalls(LOOKUP), clears(LOOKUP));
-		move_stages_info(rstages(CACHE),	rstages(LOOKUP),stalls(CACHE), 	clears(CACHE));
+		if to_integer(unsigned(rstages(LOOKUP).opclass)) = MEM then 
+			move_stages_info(rstages(CACHE),	rstages(LOOKUP),stalls(CACHE), 	clears(CACHE));
+		else 
+			clear_stage(rstages(CACHE));
+		end if;
 		move_stages_info(rstages(MEMWB),	rstages(CACHE),	stalls(MEMWB),	clears(MEMWB));
 		
-		move_stages_info(rstages(FOP1),		rstage_decode, 	stalls(FOP1), 	clears(FOP1));
+		-- fop pipeline
 		move_stages_info(rstages(FOP2), 	rstages(FOP1), 	stalls(FOP2), 	clears(FOP2));
 		move_stages_info(rstages(FOP3), 	rstages(FOP2), 	stalls(FOP3), 	clears(FOP3));
 		move_stages_info(rstages(FOP4), 	rstages(FOP3), 	stalls(FOP4), 	clears(FOP4));
