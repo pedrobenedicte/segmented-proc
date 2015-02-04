@@ -106,21 +106,19 @@ architecture Structure of control_unit is
 	signal newPC				: std_logic_vector(15 downto 0);
 	signal stalls				: std_logic_vector(11 downto 0) := "000000000000";
 	signal stall_struct_hrz		: std_logic_vector(11 downto 0) := "000000000000";
-	signal stall_alu			: std_logic := '0';
-	signal stall_mem			: std_logic	:= '0';
+	signal stall_hrz			: std_logic := '0';
 	
+	signal exc					: std_logic := '0';
 	signal jump					: std_logic	:= '0';
-	signal clear_stage			: std_logic_vector(11 downto 0) := "000000000000";
-	constant EXC_VECTOR	: std_logic_vector(15 downto 0) := "0001000000000000";
+	signal clears			: std_logic_vector(11 downto 0) := "000000000000";
+	constant EXC_VECTOR			: std_logic_vector(15 downto 0) := zero;
 	
-	signal opclass	: std_logic_vector(2 downto 0);
-	signal opcode	: std_logic_vector(1 downto 0);
-	signal immed	: std_logic_vector(15 downto 0);
-	signal addr_d	: std_logic_vector(2 downto 0);
-	signal addr_a	: std_logic_vector(2 downto 0);
-	signal addr_b	: std_logic_vector(2 downto 0);
-	
-	signal exc		: std_logic := '0';
+	signal opclass				: std_logic_vector(2 downto 0);
+	signal opcode				: std_logic_vector(1 downto 0);
+	signal immed				: std_logic_vector(15 downto 0);
+	signal addr_d				: std_logic_vector(2 downto 0);
+	signal addr_a				: std_logic_vector(2 downto 0);
+	signal addr_b				: std_logic_vector(2 downto 0);
 	
 begin
 
@@ -146,21 +144,27 @@ begin
 		bypasses_ctrl_mem	=> bypasses_ctrl_mem
 	);
 
-	stall_struct_hrz(FETCH)	<= stall_alu or stall_mem;
-	stall_struct_hrz(DECODE)<= stall_alu or stall_mem;
+	stall_struct_hrz(FETCH)	<= stall_hrz;
+	stall_struct_hrz(DECODE)<= stall_hrz;
 	
-	stall_alu	<= '1'	when	(to_integer(unsigned(rstage_decode.opclass)) = ALU and
-								to_integer(unsigned(rstages(ALU).opclass)) = MEM) or
+	stall_hrz	<= '1'	when	(to_integer(unsigned(rstage_decode.opclass)) = ALU and
+								to_integer(unsigned(rstages(ALU).opclass)) = MEM)
+								or
 								(to_integer(unsigned(rstage_decode.opclass)) = ALU and
-								to_integer(unsigned(rstages(FOP4).opclass)) = FOP)	else '0';
+								to_integer(unsigned(rstages(FOP4).opclass)) = FOP)
+								or
+								(to_integer(unsigned(rstage_decode.opclass)) = MEM and
+								to_integer(unsigned(rstages(FOP2).opclass)) = FOP)
+								else '0';
 	
-	stall_mem	<= '1'	when	to_integer(unsigned(rstage_decode.opclass)) = MEM and
-								to_integer(unsigned(rstages(FOP4).opclass)) = FOP	else '0';
-	
+	jump	<= '1'	when (to_integer(unsigned(rstages(ALU).opclass)) = BNZ) and alu_z = '1' else '0';
+	clears(FETCH)	<= jump;
+	clears(DECODE)	<= jump;
 	
 	-- FEED STAGES
 	stall_vector		<= stalls;
 	stalls				<= stall_struct_hrz;
+	
 	-- Decode
 	decode_awb_addr_d	<= rstages(LOOKUP).addr_d;
 	decode_mwb_addr_d	<= rstages(MEMWB).addr_d;
@@ -187,15 +191,10 @@ begin
 	alu_opclass			<= rstages(ALU).opclass;
 	alu_opcode			<= rstages(ALU).opcode;
 	
-
-	jump	<= '1'	when (to_integer(unsigned(rstages(ALU).opclass)) = BNZ) and alu_z = '1' else '0';
-	clear_stage(FETCH)	<= jump;
-	clear_stage(DECODE)	<= jump;
-	
 	-- Fetch signals assignation
 	fetch_pc	<=	regPC_fetch;
 
-	newPC	<=	rstages(ALU).pc+alu_w	when (to_integer(unsigned(rstages(ALU).opclass)) = BNZ) and alu_z = '1' else
+	newPC	<=	rstages(ALU).pc+alu_w	when jump = '1' else
 				EXC_VECTOR				when exc = '1' else
 				regPC_fetch+2;
 	
@@ -220,13 +219,14 @@ begin
 				if stalls(FETCH) = '0' then
 					regPC_fetch			<= newPC;
 				end if;
-				if stalls(DECODE) = '0' and clear_stage(DECODE) = '0' then
+				
+				if stalls(DECODE) = '0' and clears(DECODE) = '0' then
 					rstage_decode.pc	<= regPC_fetch;
-				elsif clear_stage(DECODE) = '1' then
+				elsif clears(DECODE) = '1' then
 					rstage_decode.pc 	<= zero;
 				end if;
-				do_pipeline_step(rstages, rstage_decode, stalls, clear_stage);
-			end if;
+				
+				do_pipeline_step(rstages, rstage_decode, stalls, clears);
 			end if;
 		end if;
 	end process;
