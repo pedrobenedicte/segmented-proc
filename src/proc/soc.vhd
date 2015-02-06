@@ -95,9 +95,9 @@ begin
 		imem			=> '0'
 	);
 
-	clk <= not clk after 10 ns;
-	reset_ram <= '1' after 15 ns, '0' after 50 ns;
-	reset_proc <= '1' after 15 ns, '0' after 90 ns;
+	clk 		<= not clk after 10 ns;
+	reset_ram 	<= '1' after 15 ns, '0' after 50 ns;
+	reset_proc 	<= '1' after 15 ns, '0' after 60 ns;
 
 	
 end Structure;

@@ -167,8 +167,10 @@ int main (int argc, char * argv[]) {
 			have_inst = false;
 		}
 
-		if (have_inst)
-			out << setfill('0') << setw(4) << hex << inst << endl;
+		if (have_inst) {
+			out << setfill('0') << setw(2) << hex << (inst&0xFF) << endl;
+			out << setfill('0') << setw(2) << hex << ((inst>>8)&0xFF) << endl;
+		}
 	}
 	out.close();
 }
