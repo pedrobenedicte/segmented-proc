@@ -44,7 +44,7 @@ architecture comportament of memory is
 			while not endfile(romfilep) loop
 				-- read data from input file
 				readline(romfilep, lbuf);
-				read(lbuf, fdata);
+				hread(lbuf, fdata);
 				data_word(i) <= fdata;
 				i := i+1;
 			end loop;
@@ -52,11 +52,16 @@ architecture comportament of memory is
 			while not endfile(romfiled) loop
 				-- read data from input file
 				readline(romfiled, lbuf);
-				read(lbuf, fdata);
+				hread(lbuf, fdata);
 				data_word(i) <= fdata;
 				i := i+1;
 			end loop;
 		end if;
+		fdata	:= "00000000";
+		while i < (2 ** 16)-1 loop
+			data_word(i) <= fdata;
+			i := i+1;
+		end loop;
 	end procedure;
 	
 begin
