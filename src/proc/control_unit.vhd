@@ -158,7 +158,7 @@ begin
 								to_integer(unsigned(rstages(FOP2).opclass)) = FOP)
 								else '0';
 	
-	jump	<= '1'	when (to_integer(unsigned(rstages(ALU).opclass)) = BNZ) and alu_z = '1' else '0';
+	jump	<= '1'	when (to_integer(unsigned(rstages(ALU).opclass)) = BNZ) and alu_z = '0' else '0';
 	clears(FETCH)	<= jump;
 	clears(DECODE)	<= jump;
 	
