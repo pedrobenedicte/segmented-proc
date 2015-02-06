@@ -89,8 +89,7 @@ architecture Structure OF datapath is
 			boot			: in	std_logic;
 			stall			: in	std_logic;
 			
-			-- flipflop inputs
-			ff_pc			: in	std_logic_vector(15 downto 0);
+			pc				: in	std_logic_vector(15 downto 0);
 			
 			imem_addr		: out	std_logic_vector(15 downto 0);
 			imem_rd_data	: in	std_logic_vector(63 downto 0);
@@ -368,8 +367,7 @@ begin
 		boot		=> boot,
 		stall		=> stall_vector(FETCH),
 		
-		-- flipflop inputs
-		ff_pc		=> fetch_pc,
+		pc			=> fetch_pc,
 		
 		imem_addr	=> imem_addr,
 		imem_rd_data=> imem_rd_data,

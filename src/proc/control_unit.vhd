@@ -102,6 +102,7 @@ architecture Structure of control_unit is
 	signal rstages				: reg_stages;
 	signal rstage_decode		: reg_stages_entry;
 	
+	signal first_fetch			: std_logic := '1';
 	signal regPC_fetch			: std_logic_vector(15 downto 0);
 	signal newPC				: std_logic_vector(15 downto 0);
 	signal stalls				: std_logic_vector(11 downto 0) := "000000000000";
@@ -214,8 +215,10 @@ begin
 			if boot = '1' then
 				regPC_fetch			<= zero;
 				rstage_decode.pc 	<= zero;
+				first_fetch			<= '1';
 				clear_pipeline(rstages);
-			else
+			elsif (first_fetch = '0') then
+				
 				if stalls(FETCH) = '0' then
 					regPC_fetch			<= newPC;
 				end if;
@@ -227,8 +230,9 @@ begin
 				end if;
 				
 				do_pipeline_step(rstages, rstage_decode, stalls, clears);
+			else
+				first_fetch			<= '0';
 			end if;
 		end if;
 	end process;
-	
 end Structure;

@@ -12,8 +12,7 @@ entity stage_fetch is
 		boot			: in	std_logic;
 		stall			: in	std_logic;
 		
-		-- flipflop inputs
-		ff_pc			: in	std_logic_vector(15 downto 0);
+		pc				: in	std_logic_vector(15 downto 0);
 		
 		imem_addr		: out	std_logic_vector(15 downto 0);
 		imem_rd_data	: in	std_logic_vector(63 downto 0);
@@ -71,7 +70,6 @@ architecture Structure of stage_fetch is
 		);
 	end component;
 	
-	signal pc				: std_logic_vector(15 downto 0);
 	signal cache_add		: std_logic_vector(15 downto 0);
 	signal address_tlb		: std_logic_vector(15 downto 0);
 	signal tlb_hit			: std_logic;
@@ -121,10 +119,10 @@ begin
 	begin
 		if (rising_edge(clk)) then
 			if boot = '1' then
-				pc 	<= zero;
+			
 			else
 				if not (stall = '1') then
-					pc 	<= ff_pc;
+				
 				end if;
 			end if;
 		end if;
