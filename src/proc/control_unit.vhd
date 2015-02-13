@@ -102,7 +102,7 @@ architecture Structure of control_unit is
 	signal rstages				: reg_stages;
 	signal rstage_decode		: reg_stages_entry;
 	
-	signal first_fetch			: std_logic := '1';
+	signal delay_first_fetch	: std_logic := '1';
 	signal regPC_fetch			: std_logic_vector(15 downto 0);
 	signal newPC				: std_logic_vector(15 downto 0);
 	signal stalls				: std_logic_vector(11 downto 0) := "000000000000";
@@ -110,8 +110,8 @@ architecture Structure of control_unit is
 	signal stall_hrz			: std_logic := '0';
 	
 	signal exc					: std_logic := '0';
-	signal jump					: std_logic	:= '0';
-	signal clears			: std_logic_vector(11 downto 0) := "000000000000";
+	signal jump					: std_logic_vector(1 downto 0) := "00";
+	signal clears				: std_logic_vector(11 downto 0) := "000000000000";
 	constant EXC_VECTOR			: std_logic_vector(15 downto 0) := zero;
 	
 	signal opclass				: std_logic_vector(2 downto 0);
@@ -158,9 +158,15 @@ begin
 								to_integer(unsigned(rstages(FOP2).opclass)) = FOP)
 								else '0';
 	
-	jump	<= '1'	when (to_integer(unsigned(rstages(ALU).opclass)) = BNZ) and alu_z = '0' else '0';
-	clears(FETCH)	<= jump;
-	clears(DECODE)	<= jump;
+	jump(FETCH)			<= '1'	when (to_integer(unsigned(rstages(ALU).opclass)) = BNZ) and alu_z = '0' else '0';
+	clears(FETCH)		<= jump(FETCH);
+	clears(DECODE)		<= jump(FETCH) or jump(DECODE);
+	
+	-- Instruction flow managment
+	clears(ALU)			<= '1'	when to_integer(unsigned(rstage_decode.opclass)) = FOP else '0';	-- clean alu when fop instr 
+	clears(FOP1)		<= '0'	when to_integer(unsigned(rstage_decode.opclass)) = FOP else '1';	-- clean fop when no fop instr
+	clears(LOOKUP)		<= '1'	when to_integer(unsigned(rstages(ALU).opclass)) = BNZ else '0';		-- kill bnz instr
+	clears(CACHE)		<= '0'	when to_integer(unsigned(rstages(LOOKUP).opclass)) = MEM else '1';	-- kill alu instr
 	
 	-- FEED STAGES
 	stall_vector		<= stalls;
@@ -195,9 +201,9 @@ begin
 	-- Fetch signals assignation
 	fetch_pc	<=	regPC_fetch;
 
-	newPC	<=	rstages(ALU).pc+alu_w	when jump = '1' else
-				EXC_VECTOR				when exc = '1' else
-				regPC_fetch+2;
+	newPC		<=	rstages(ALU).pc+alu_w	when jump(FETCH) = '1' else
+					EXC_VECTOR				when exc = '1' else
+					regPC_fetch+2;
 	
 	fetch_cache_mem <= '1';
 	
@@ -213,25 +219,32 @@ begin
 	begin
 		if (rising_edge(clk)) then
 			if boot = '1' then
+				
 				regPC_fetch			<= zero;
 				rstage_decode.pc 	<= zero;
-				first_fetch			<= '1';
+				delay_first_fetch	<= '1';
 				clear_pipeline(rstages);
-			elsif (first_fetch = '0') then
+				
+			elsif (delay_first_fetch = '0') then
 				
 				if stalls(FETCH) = '0' then
 					regPC_fetch			<= newPC;
 				end if;
 				
-				if stalls(DECODE) = '0' and clears(DECODE) = '0' then
-					rstage_decode.pc	<= regPC_fetch;
-				elsif clears(DECODE) = '1' then
-					rstage_decode.pc 	<= zero;
+				if stalls(DECODE) = '0' then
+					if clears(DECODE) = '0' then
+						rstage_decode.pc 	<= regPC_fetch;
+					else 
+						rstage_decode.pc	<= zero;
+					end if;
 				end if;
 				
+				jump(DECODE) <= jump(FETCH);
+				
 				do_pipeline_step(rstages, rstage_decode, stalls, clears);
+				
 			else
-				first_fetch			<= '0';
+				delay_first_fetch	<= '0';
 			end if;
 		end if;
 	end process;
