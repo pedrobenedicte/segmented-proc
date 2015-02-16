@@ -43,7 +43,7 @@ begin
 	
 	with to_integer(unsigned(ir(15 downto 13))) select
 		immed	<=	ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10 DOWNTO 6) 	when MEM,
-					ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10 DOWNTO 3) 						when BNZ,
+					ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10)&ir(10 DOWNTO 3)&'0' 							when BNZ,
 					debug	when others;
 
 end Structure;

@@ -161,9 +161,11 @@ begin
 	jump(FETCH)			<= '1'	when (to_integer(unsigned(rstages(ALU).opclass)) = BNZ) and alu_z = '0' else '0';
 	clears(FETCH)		<= jump(FETCH);
 	clears(DECODE)		<= jump(FETCH) or jump(DECODE);
+	clears(ALU)			<= jump(FETCH) or jump(DECODE);
+	clears(FOP1)		<= jump(FETCH) or jump(DECODE);
 	
 	-- Instruction flow managment
-	clears(ALU)			<= '1'	when to_integer(unsigned(rstage_decode.opclass)) = FOP else '0';	-- clean alu when fop instr 
+	clears(ALU)			<= '1'	when to_integer(unsigned(rstage_decode.opclass)) = FOP else '0';	-- clean alu when fop instr
 	clears(FOP1)		<= '0'	when to_integer(unsigned(rstage_decode.opclass)) = FOP else '1';	-- clean fop when no fop instr
 	clears(LOOKUP)		<= '1'	when to_integer(unsigned(rstages(ALU).opclass)) = BNZ else '0';		-- kill bnz instr
 	clears(CACHE)		<= '0'	when to_integer(unsigned(rstages(LOOKUP).opclass)) = MEM else '1';	-- kill alu instr
@@ -234,7 +236,7 @@ begin
 				if stalls(DECODE) = '0' then
 					if clears(DECODE) = '0' then
 						rstage_decode.pc 	<= regPC_fetch;
-					else 
+					else
 						rstage_decode.pc	<= zero;
 					end if;
 				end if;

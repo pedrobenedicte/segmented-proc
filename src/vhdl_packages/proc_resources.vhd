@@ -118,7 +118,7 @@ package body proc_resources is
 		-- alu/mem pipeline
 		move_stages_info(rstages(ALU), 		rstage_decode, 	stalls(ALU), 	clears(ALU));
 		move_stages_info(rstages(LOOKUP),	rstages(ALU), 	stalls(LOOKUP), clears(LOOKUP));
-		move_stages_info(rstages(CACHE),	rstages(LOOKUP),stalls(CACHE), 	clears(CACHE));		
+		move_stages_info(rstages(CACHE),	rstages(LOOKUP),stalls(CACHE), 	clears(CACHE));
 		move_stages_info(rstages(MEMWB),	rstages(CACHE),	stalls(MEMWB),	clears(MEMWB));
 		
 		-- fop pipeline

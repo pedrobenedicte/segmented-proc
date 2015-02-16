@@ -25,7 +25,7 @@ short nregister(string str){
 short read_loads(istringstream &in) {
 	string str;
 	short ret = 0;
-	int nreg;
+	short nreg;
 
 	in >> nreg;
 	ret |= (0x1F&nreg) << 6;
@@ -49,7 +49,7 @@ short read_loads(istringstream &in) {
 short read_stores(istringstream &in) {
 	string str;
 	short ret = 0;
-	int nreg;
+	short nreg;
 
 	in >> str;
 	nreg = nregister(str);
@@ -74,7 +74,7 @@ short read_stores(istringstream &in) {
 short read_bnz(istringstream &in) {
 	string str;
 	short ret = 0;
-	int nreg;
+	short nreg;
 
 	in >> str;
 	nreg = nregister(str);
@@ -82,6 +82,7 @@ short read_bnz(istringstream &in) {
 	ret |= nreg;
 
 	in >> nreg;
+	if (-128 > nreg || 127 < nreg) return -1;
 	ret |= (0xFF&nreg) << 3;
 
 	return ret;
@@ -90,7 +91,7 @@ short read_bnz(istringstream &in) {
 short read_artm(istringstream &in) {
 	string str;
 	short ret = 0;
-	int nreg;
+	short nreg;
 
 	in >> str;
 	nreg = nregister(str);
